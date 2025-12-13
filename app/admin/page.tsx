@@ -562,31 +562,33 @@ export default function AdminPage() {
                   return (
                     <div
                       key={`${ticket.eventId}-${ticket.ticketId}`}
-                      className="bg-white rounded-lg p-4 cursor-pointer hover:shadow-xl transition overflow-hidden"
+                      className="bg-gray-900 rounded-lg p-4 cursor-pointer hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] transition overflow-hidden border border-purple-500/30"
                       onClick={() => setSelectedTicket(ticket)}
                     >
-                      <div className="flex items-center gap-3 mb-3 pb-3 border-b border-gray-100">
+                      <div className="flex items-center gap-3 mb-3 pb-3 border-b border-white/10">
                         <img 
                           src={avatarUrl} 
                           alt="Avatar" 
-                          className="w-10 h-10 rounded bg-gray-100"
+                          className="w-10 h-10 rounded bg-gray-800 border border-purple-500/30"
                         />
                         <div className="overflow-hidden">
-                          <p className="font-bold text-gray-800 text-sm truncate">{ticket.eventName}</p>
-                          <p className="text-xs text-gray-500">Ticket #{ticket.ticketId.toString()}</p>
+                          <p className="font-bold text-white text-sm truncate drop-shadow-[0_0_5px_rgba(168,85,247,0.5)]">{ticket.eventName}</p>
+                          <p className="text-xs text-purple-400">Ticket #{ticket.ticketId.toString()}</p>
                         </div>
                       </div>
 
-                      <div className="flex justify-center mb-3 bg-gray-50 p-2 rounded">
+                      <div className="flex justify-center mb-3 bg-white/5 p-2 rounded border border-white/5">
                         <QRCodeSVG 
                           value={qrData} 
                           size={120}
                           level="H"
                           includeMargin={false}
+                          fgColor="#ffffff"
+                          bgColor="transparent"
                         />
                       </div>
                       <div className="pt-1">
-                        <p className="text-xs text-gray-600">Event #{ticket.eventId.toString()}</p>
+                        <p className="text-xs text-gray-400">Event #{ticket.eventId.toString()}</p>
                         <p className="text-xs text-gray-500 mt-1 truncate font-mono" title={ticket.buyer}>
                           👤 {ticket.buyer}
                         </p>
@@ -600,11 +602,11 @@ export default function AdminPage() {
             {/* Ticket Detail Modal */}
             {selectedTicket && (
               <div
-                className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+                className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
                 onClick={() => setSelectedTicket(null)}
               >
                 <div
-                  className="bg-white rounded-lg p-8 max-w-md w-full"
+                  className="bg-gray-900 border border-purple-500/30 rounded-lg p-8 max-w-md w-full shadow-[0_0_30px_rgba(168,85,247,0.2)]"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex justify-between items-start mb-6">
@@ -612,22 +614,22 @@ export default function AdminPage() {
                       <img 
                         src={`https://api.dicebear.com/9.x/pixel-art/svg?seed=${selectedTicket.ticketId.toString()}`}
                         alt="Avatar" 
-                        className="w-16 h-16 rounded-lg bg-gray-100 border-2 border-purple-500"
+                        className="w-16 h-16 rounded-lg bg-gray-800 border border-purple-500"
                       />
                       <div>
-                        <h3 className="text-xl font-bold text-gray-800">Ticket Details</h3>
-                        <p className="text-sm text-purple-600 font-bold">#{selectedTicket.ticketId.toString()}</p>
+                        <h3 className="text-xl font-bold text-white drop-shadow-[0_0_5px_rgba(168,85,247,0.5)]">Ticket Details</h3>
+                        <p className="text-sm text-purple-400 font-bold">#{selectedTicket.ticketId.toString()}</p>
                       </div>
                     </div>
                     <button
                       onClick={() => setSelectedTicket(null)}
-                      className="text-gray-500 hover:text-gray-700 text-2xl"
+                      className="text-gray-400 hover:text-white text-2xl"
                     >
                       ×
                     </button>
                   </div>
                   
-                  <div className="flex justify-center mb-6 bg-gray-50 p-4 rounded-xl">
+                  <div className="flex justify-center mb-6 bg-white/5 p-4 rounded-xl border border-purple-500/20">
                     <QRCodeSVG 
                       value={JSON.stringify({
                         ticketId: selectedTicket.ticketId.toString(),
@@ -639,29 +641,31 @@ export default function AdminPage() {
                       size={200}
                       level="H"
                       includeMargin={true}
+                      fgColor="#ffffff"
+                      bgColor="transparent"
                     />
                   </div>
                   
                   <div className="space-y-3">
                     <div>
-                      <p className="text-sm text-gray-500">Event Name</p>
-                      <p className="font-semibold text-gray-800">{selectedTicket.eventName}</p>
+                      <p className="text-sm text-gray-400">Event Name</p>
+                      <p className="font-semibold text-white">{selectedTicket.eventName}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Ticket ID</p>
-                      <p className="font-semibold text-gray-800">#{selectedTicket.ticketId.toString()}</p>
+                      <p className="text-sm text-gray-400">Ticket ID</p>
+                      <p className="font-semibold text-white">#{selectedTicket.ticketId.toString()}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Event ID</p>
-                      <p className="font-semibold text-gray-800">#{selectedTicket.eventId.toString()}</p>
+                      <p className="text-sm text-gray-400">Event ID</p>
+                      <p className="font-semibold text-white">#{selectedTicket.eventId.toString()}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Buyer Address</p>
-                      <p className="font-mono text-xs text-gray-800 break-all">{selectedTicket.buyer}</p>
+                      <p className="text-sm text-gray-400">Buyer Address</p>
+                      <p className="font-mono text-xs text-white break-all">{selectedTicket.buyer}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Event Date</p>
-                      <p className="font-semibold text-gray-800">
+                      <p className="text-sm text-gray-400">Event Date</p>
+                      <p className="font-semibold text-white">
                         {new Date(Number(selectedTicket.eventDate) * 1000).toLocaleString()}
                       </p>
                     </div>

@@ -43,7 +43,7 @@ export default function EventsPage() {
     const node = document.getElementById(`ticket-card-${ticketId}`);
     if (!node) return;
 
-    toPng(node, { cacheBust: true, backgroundColor: '#ffffff' })
+    toPng(node, { cacheBust: true, backgroundColor: '#111827' })
       .then((dataUrl) => {
         const link = document.createElement('a');
         link.download = `monoken-ticket-${ticketId}.png`;
@@ -355,50 +355,53 @@ export default function EventsPage() {
                   return (
                     <div
                       key={ticket.ticketId.toString()}
-                      className="bg-white rounded-xl shadow-xl overflow-hidden transform transition hover:scale-[1.02]"
+                      className="bg-gray-900 rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.3)] overflow-hidden transform transition hover:scale-[1.02] border border-purple-500/30"
                     >
                       {/* Capture Area */}
-                      <div id={`ticket-card-${ticket.ticketId.toString()}`} className="p-6 bg-white relative">
+                      <div id={`ticket-card-${ticket.ticketId.toString()}`} className="p-6 bg-gray-900 relative">
                         {/* Decorative top bar */}
-                        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-500 to-pink-500"></div>
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]"></div>
                         
                         {/* Avatar Header */}
                         <div className="flex items-center gap-4 mb-6 mt-2">
                           <div className="relative">
-                            <div className="absolute inset-0 bg-purple-200 rounded-lg blur-sm transform rotate-3"></div>
+                            <div className="absolute inset-0 bg-purple-500 rounded-lg blur-md opacity-50"></div>
                             <img 
                               src={avatarUrl} 
                               alt="Ticket Avatar" 
-                              className="relative w-16 h-16 rounded-lg bg-gray-100 border-2 border-white shadow-sm"
+                              className="relative w-16 h-16 rounded-lg bg-gray-800 border border-purple-500/50"
                             />
                           </div>
                           <div>
-                            <p className="text-xs text-purple-600 font-bold uppercase tracking-wider mb-1">Web3 Ticket</p>
-                            <h3 className="text-lg font-bold text-gray-900 leading-tight line-clamp-1">{ticket.eventName}</h3>
+                            <p className="text-xs text-purple-400 font-bold uppercase tracking-wider mb-1 drop-shadow-[0_0_5px_rgba(168,85,247,0.8)]">Web3 Ticket</p>
+                            <h3 className="text-lg font-bold text-white leading-tight line-clamp-1 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]">{ticket.eventName}</h3>
                           </div>
                         </div>
 
                         {/* QR Code */}
-                        <div className="flex justify-center mb-6 bg-gray-50 p-4 rounded-xl border-2 border-dashed border-gray-200">
-                          <QRCodeSVG 
-                            value={qrData} 
-                            size={180}
-                            level="H"
-                            includeMargin={true}
-                            fgColor="#000000"
-                            bgColor="#ffffff"
-                          />
+                        <div className="flex justify-center mb-6 bg-white/5 p-4 rounded-xl border border-dashed border-purple-500/30 relative group">
+                          <div className="absolute inset-0 bg-purple-500/5 blur-xl rounded-xl"></div>
+                          <div className="relative z-10">
+                            <QRCodeSVG 
+                              value={qrData} 
+                              size={180}
+                              level="H"
+                              includeMargin={true}
+                              fgColor="#ffffff"
+                              bgColor="transparent"
+                            />
+                          </div>
                         </div>
                         
                         {/* Ticket Info */}
                         <div className="space-y-3">
-                          <div className="flex items-center text-gray-600 text-sm bg-gray-50 p-2 rounded-lg">
+                          <div className="flex items-center text-gray-300 text-sm bg-white/5 p-2 rounded-lg border border-white/5">
                             <span className="w-8 text-center text-lg">📍</span>
-                            <span className="font-medium">{ticket.eventLocation}</span>
+                            <span className="font-medium text-purple-100">{ticket.eventLocation}</span>
                           </div>
-                          <div className="flex items-center text-gray-600 text-sm bg-gray-50 p-2 rounded-lg">
+                          <div className="flex items-center text-gray-300 text-sm bg-white/5 p-2 rounded-lg border border-white/5">
                             <span className="w-8 text-center text-lg">📅</span>
-                            <span className="font-medium">
+                            <span className="font-medium text-purple-100">
                               {new Date(Number(ticket.eventDate) * 1000).toLocaleDateString('en-US', { 
                                 weekday: 'short', 
                                 year: 'numeric', 
@@ -410,24 +413,24 @@ export default function EventsPage() {
                             </span>
                           </div>
                           
-                          <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
+                          <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/10">
                             <div className="flex flex-col">
-                              <span className="text-[10px] text-gray-400 uppercase font-bold">Ticket ID</span>
-                              <span className="text-sm font-mono text-gray-600">#{ticket.ticketId.toString()}</span>
+                              <span className="text-[10px] text-purple-400/70 uppercase font-bold">Ticket ID</span>
+                              <span className="text-sm font-mono text-purple-200">#{ticket.ticketId.toString()}</span>
                             </div>
                             <div className="flex flex-col items-end">
-                              <span className="text-[10px] text-gray-400 uppercase font-bold">Event ID</span>
-                              <span className="text-sm font-mono text-gray-600">#{ticket.eventId.toString()}</span>
+                              <span className="text-[10px] text-purple-400/70 uppercase font-bold">Event ID</span>
+                              <span className="text-sm font-mono text-purple-200">#{ticket.eventId.toString()}</span>
                             </div>
                           </div>
                         </div>
                       </div>
 
                       {/* Actions */}
-                      <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                      <div className="px-6 py-4 bg-gray-900 border-t border-white/5">
                         <button 
                           onClick={() => downloadTicket(ticket.ticketId.toString())}
-                          className="w-full flex justify-center items-center gap-2 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg text-sm font-bold transition shadow-md hover:shadow-lg transform active:scale-95"
+                          className="w-full flex justify-center items-center gap-2 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-bold transition shadow-[0_0_15px_rgba(147,51,234,0.3)] hover:shadow-[0_0_20px_rgba(147,51,234,0.5)] transform active:scale-95 border border-purple-400/20"
                         >
                           <span>📸</span> Download for Story
                         </button>
