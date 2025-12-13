@@ -51,13 +51,41 @@ Visit: http://localhost:3000
 
 ### **Admin** (at `/admin`)
 - Connect wallet (must be deployer)
-- Create events: name, date, location, price, max tickets
-- View all events
+- **Create Events**: Set name, date, location, price, and max tickets
+- **View All Events**: See event details, revenue, and ticket sales
+- **Manage Tickets**: View all sold tickets with QR codes and buyer information
+- **Withdraw Funds**: Collect revenue from ticket sales
 
 ### **Users** (at `/events`)
 - Connect wallet
-- Browse events
+- Browse available events
 - Purchase tickets (minted as NFTs)
+- **View Your Tickets**: Each ticket includes a unique QR code for verification
+- Download or scan QR codes for event entry
+
+---
+
+## 🎫 QR Code Features
+
+Every purchased ticket generates a **unique QR code** containing:
+- Ticket ID
+- Event ID
+- Owner address
+- Event name
+- Contract address
+- Timestamp
+
+**Admin Benefits:**
+- Track all ticket purchases
+- View buyer information
+- Scan QR codes for event entry verification
+- Monitor ticket sales in real-time
+
+**User Benefits:**
+- Digital ticket with QR code
+- Easy verification at events
+- Permanent NFT ownership
+- Beautiful ticket design with event details
 
 ---
 
@@ -83,19 +111,38 @@ bun run test
 
 ## 📝 Key Features
 
-✅ Admin event creation  
-✅ NFT-based tickets  
-✅ Wallet authentication (owner-only admin)  
-✅ Event browsing & ticket purchase  
-✅ Deployed on Monad testnet  
+✅ **Admin Dashboard**
+  - Create and manage events
+  - View all events with revenue tracking
+  - Monitor all ticket sales and buyers
+  - Withdraw collected funds
+  
+✅ **QR Code Ticketing**
+  - Unique QR code for each ticket
+  - Secure verification system
+  - Beautiful ticket design
+  
+✅ **NFT-Based Tickets**
+  - Tickets minted as NFTs
+  - Permanent ownership record
+  - Blockchain verification
+  
+✅ **User Features**
+  - Browse available events
+  - Purchase tickets with crypto
+  - View digital tickets with QR codes
+  - Wallet authentication
+
+✅ **Deployed on Monad Testnet**
 
 ---
 
 ## 🛠️ Tech Stack
 
 - **Contracts**: Solidity, Hardhat
-- **Frontend**: Next.js 14, TypeScript, Tailwind
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
 - **Web3**: wagmi, viem, RainbowKit
+- **QR Codes**: qrcode.react
 - **Chain**: Monad Testnet
 
 ---

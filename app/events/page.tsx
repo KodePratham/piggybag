@@ -7,6 +7,7 @@ import { CONTRACT_ADDRESS, ADMIN_ADDRESS, EVENT_TICKETING_ABI } from '../config/
 import { monadTestnet } from '../config/wagmi';
 import WalletButton from '../components/WalletButton';
 import { useRouter } from 'next/navigation';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface Event {
   id: string | bigint;
@@ -256,18 +257,33 @@ export default function EventsPage() {
 
   if (!CONTRACT_ADDRESS) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-pink-800 flex items-center justify-center">
-        <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg border border-white/20">
-          <h1 className="text-2xl font-bold text-white mb-4">⚠️ Contract Not Deployed</h1>
-          <p className="text-white/80">Please deploy the contract first and add the address to .env</p>
+      <div className="min-h-screen w-full relative">
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            background: "radial-gradient(125% 125% at 50% 10%, #1f2937 40%, #7c3aed 100%)",
+          }}
+        />
+        <div className="relative z-10 flex items-center justify-center min-h-screen">
+          <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg border border-white/20">
+            <h1 className="text-2xl font-bold text-white mb-4">⚠️ Contract Not Deployed</h1>
+            <p className="text-white/80">Please deploy the contract first and add the address to .env</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-pink-800">
-      <nav className="bg-black/20 backdrop-blur-md border-b border-white/10">
+    <div className="min-h-screen w-full relative">
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          background: "radial-gradient(125% 125% at 50% 10%, #1f2937 40%, #7c3aed 100%)",
+        }}
+      />
+      <div className="relative z-10">
+        <nav className="bg-black/20 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
@@ -281,14 +297,14 @@ export default function EventsPage() {
             <div className="flex gap-4">
               <button
                 onClick={() => router.push('/')}
-                className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition"
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition"
               >
                 Home
               </button>
               {isAdmin && (
                 <button
                   onClick={() => router.push('/admin')}
-                  className="px-4 py-2 bg-purple-500 hover:bg-purple-600 rounded-lg text-white transition"
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition"
                 >
                   Admin Panel
                 </button>
@@ -307,30 +323,55 @@ export default function EventsPage() {
             
             {ticketDetails.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {ticketDetails.map((ticket) => (
-                  <div
-                    key={ticket.ticketId.toString()}
-                    className="bg-white/5 border border-white/20 rounded-lg p-4"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-lg font-bold text-white">{ticket.eventName}</h3>
-                      {ticket.isUsed ? (
-                        <span className="px-2 py-1 bg-red-500/20 border border-red-500/50 rounded text-red-300 text-xs">
-                          Used
-                        </span>
-                      ) : (
-                        <span className="px-2 py-1 bg-green-500/20 border border-green-500/50 rounded text-green-300 text-xs">
-                          Valid
-                        </span>
-                      )}
+                {ticketDetails.map((ticket) => {
+                  // Generate unique QR code data for each ticket
+                  const qrData = JSON.stringify({
+                    ticketId: ticket.ticketId.toString(),
+                    eventId: ticket.eventId.toString(),
+                    eventName: ticket.eventName,
+                    contract: CONTRACT_ADDRESS,
+                    timestamp: Date.now(),
+                  });
+                  
+                  return (
+                    <div
+                      key={ticket.ticketId.toString()}
+                      className="bg-white rounded-lg p-6 shadow-xl"
+                    >
+                      {/* QR Code */}
+                      <div className="flex justify-center mb-4 bg-white p-2 rounded">
+                        <QRCodeSVG 
+                          value={qrData} 
+                          size={180}
+                          level="H"
+                          includeMargin={true}
+                          fgColor="#000000"
+                          bgColor="#ffffff"
+                        />
+                      </div>
+                      
+                      {/* Ticket Info */}
+                      <div className="border-t-2 border-dashed border-gray-300 pt-4">
+                        <div className="mb-2">
+                          <h3 className="text-lg font-bold text-gray-800">{ticket.eventName}</h3>
+                        </div>
+                        <p className="text-gray-600 text-sm mb-2">📍 {ticket.eventLocation}</p>
+                        <p className="text-gray-600 text-sm mb-2">
+                          📅 {new Date(Number(ticket.eventDate) * 1000).toLocaleDateString('en-US', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                        <p className="text-gray-500 text-xs mt-3 font-mono">Ticket #{ticket.ticketId.toString()}</p>
+                        <p className="text-gray-400 text-xs font-mono truncate">Event #{ticket.eventId.toString()}</p>
+                      </div>
                     </div>
-                    <p className="text-white/70 text-sm mb-2">📍 {ticket.eventLocation}</p>
-                    <p className="text-white/70 text-sm mb-2">
-                      📅 {new Date(Number(ticket.eventDate) * 1000).toLocaleDateString()}
-                    </p>
-                    <p className="text-white/50 text-xs">Ticket #{ticket.ticketId.toString()}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="text-white/80">Loading ticket details...</p>
@@ -355,7 +396,7 @@ export default function EventsPage() {
               {isAdmin && (
                 <button
                   onClick={() => router.push('/admin')}
-                  className="mt-4 px-6 py-2 bg-purple-500 hover:bg-purple-600 rounded-lg text-white transition"
+                  className="mt-4 px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition"
                 >
                   Create First Event
                 </button>
@@ -412,7 +453,7 @@ export default function EventsPage() {
                         isPending ||
                         isConfirming
                       }
-                      className="w-full px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-semibold transition"
+                      className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-500 disabled:cursor-not-allowed rounded-lg text-white font-semibold transition"
                     >
                       {!isConnected
                         ? 'Connect Wallet'
@@ -428,7 +469,7 @@ export default function EventsPage() {
                     {isAdmin && (
                       <button
                         onClick={() => handleToggleStatus(BigInt(event.id))}
-                        className="w-full px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white text-sm transition"
+                        className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm transition"
                       >
                         {event.isActive ? 'Deactivate' : 'Activate'} Event
                       </button>
@@ -447,6 +488,7 @@ export default function EventsPage() {
             </p>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

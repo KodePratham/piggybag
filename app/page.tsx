@@ -72,7 +72,7 @@ export default function Home() {
           <div className="pt-8 pointer-events-auto flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
               onClick={() => router.push('/events')}
-              className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg text-white font-semibold text-lg transition transform hover:scale-105 shadow-lg"
+              className="bg-white text-purple-600 px-12 py-4 rounded-full text-lg font-bold hover:bg-purple-50 transition-all shadow-2xl hover:scale-105"
             >
               🎫 Browse Events
             </button>
