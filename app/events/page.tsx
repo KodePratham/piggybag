@@ -64,19 +64,90 @@ export default function EventsPage() {
     fetchEventIds();
   }, []);
 
-  // Get user tickets
-  const { data: userTicketIds, refetch: refetchUserTickets } = useReadContract({
-    address: CONTRACT_ADDRESS as `0x${string}`,
-    abi: EVENT_TICKETING_ABI,
-    functionName: 'getUserTickets',
-    args: address ? [address] : undefined,
-  });
-
+  // Get user tickets - fetch directly instead of using useReadContract
   useEffect(() => {
-    if (userTicketIds) {
-      setUserTickets(userTicketIds as bigint[]);
-    }
-  }, [userTicketIds]);
+    const fetchUserTickets = async () => {
+      if (!address || !isConnected) {
+        setUserTickets([]);
+        return;
+      }
+
+      try {
+        const client = createPublicClient({
+          chain: monadTestnet,
+          transport: http(),
+        });
+
+        const tickets = await client.readContract({
+          address: CONTRACT_ADDRESS as `0x${string}`,
+          abi: EVENT_TICKETING_ABI,
+          functionName: 'getUserTickets',
+          args: [address],
+        }) as bigint[];
+
+        console.log("User ticket IDs (direct fetch):", tickets);
+        setUserTickets(tickets || []);
+      } catch (error) {
+        console.error("Error fetching user tickets:", error);
+        setUserTickets([]);
+      }
+    };
+
+    fetchUserTickets();
+  }, [address, isConnected]);
+
+  // Fetch user ticket details
+  const [ticketDetails, setTicketDetails] = useState<any[]>([]);
+  
+  useEffect(() => {
+    const fetchTicketDetails = async () => {
+      if (!userTickets || userTickets.length === 0) {
+        setTicketDetails([]);
+        return;
+      }
+
+      const client = createPublicClient({
+        chain: monadTestnet,
+        transport: http(),
+      });
+
+      const detailsPromises = userTickets.map(async (ticketId) => {
+        try {
+          const ticket = await client.readContract({
+            address: CONTRACT_ADDRESS as `0x${string}`,
+            abi: EVENT_TICKETING_ABI,
+            functionName: 'getTicket',
+            args: [ticketId],
+          }) as any;
+
+          // Get event details for this ticket
+          const event = await client.readContract({
+            address: CONTRACT_ADDRESS as `0x${string}`,
+            abi: EVENT_TICKETING_ABI,
+            functionName: 'getEvent',
+            args: [ticket[1]], // eventId
+          }) as any;
+
+          return {
+            ticketId,
+            eventId: ticket[1],
+            eventName: event[1],
+            eventLocation: event[3],
+            eventDate: event[4],
+            isUsed: ticket[2],
+          };
+        } catch (error) {
+          console.error(`Error fetching ticket ${ticketId}:`, error);
+          return null;
+        }
+      });
+
+      const details = await Promise.all(detailsPromises);
+      setTicketDetails(details.filter(d => d !== null));
+    };
+
+    fetchTicketDetails();
+  }, [userTickets]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -228,35 +299,49 @@ export default function EventsPage() {
         </div>
       </nav>
 
-      {/* Wrong Network Warning */}
-      {isConnected && !isCorrectNetwork && (
-        <div className="bg-yellow-500/20 border-b border-yellow-500/50 backdrop-blur-md">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">⚠️</span>
-                <div>
-                  <p className="text-yellow-300 font-semibold">Wrong Network</p>
-                  <p className="text-yellow-200/80 text-sm">Please switch to Monad Testnet to purchase tickets</p>
-                </div>
-              </div>
-              <button
-                onClick={() => switchChain({ chainId: monadTestnet.id })}
-                className="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 rounded-lg text-black font-semibold transition"
-              >
-                Switch to Monad Testnet
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* User Tickets Section */}
         {isConnected && userTickets.length > 0 && (
           <div className="mb-8 bg-white/10 backdrop-blur-md rounded-lg border border-white/20 p-6">
             <h2 className="text-2xl font-semibold text-white mb-4">🎫 My Tickets ({userTickets.length})</h2>
-            <p className="text-white/80">You own {userTickets.length} ticket(s)</p>
+            
+            {ticketDetails.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {ticketDetails.map((ticket) => (
+                  <div
+                    key={ticket.ticketId.toString()}
+                    className="bg-white/5 border border-white/20 rounded-lg p-4"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-lg font-bold text-white">{ticket.eventName}</h3>
+                      {ticket.isUsed ? (
+                        <span className="px-2 py-1 bg-red-500/20 border border-red-500/50 rounded text-red-300 text-xs">
+                          Used
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 bg-green-500/20 border border-green-500/50 rounded text-green-300 text-xs">
+                          Valid
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-white/70 text-sm mb-2">📍 {ticket.eventLocation}</p>
+                    <p className="text-white/70 text-sm mb-2">
+                      📅 {new Date(Number(ticket.eventDate) * 1000).toLocaleDateString()}
+                    </p>
+                    <p className="text-white/50 text-xs">Ticket #{ticket.ticketId.toString()}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-white/80">Loading ticket details...</p>
+            )}
+          </div>
+        )}
+
+        {/* Debug: Show if connected but no tickets */}
+        {isConnected && userTickets.length === 0 && (
+          <div className="mb-8 bg-white/10 backdrop-blur-md rounded-lg border border-white/20 p-6">
+            <p className="text-white/80">You don't have any tickets yet. Purchase one below!</p>
           </div>
         )}
 

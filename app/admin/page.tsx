@@ -173,29 +173,6 @@ export default function AdminPage() {
         </div>
       </nav>
 
-      {/* Wrong Network Warning */}
-      {isConnected && !isCorrectNetwork && (
-        <div className="bg-yellow-500/20 border-b border-yellow-500/50 backdrop-blur-md">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">⚠️</span>
-                <div>
-                  <p className="text-yellow-300 font-semibold">Wrong Network</p>
-                  <p className="text-yellow-200/80 text-sm">Please switch to Monad Testnet to create events</p>
-                </div>
-              </div>
-              <button
-                onClick={() => switchChain({ chainId: monadTestnet.id })}
-                className="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 rounded-lg text-black font-semibold transition"
-              >
-                Switch to Monad Testnet
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Contract Balance */}
         <div className="bg-white/10 backdrop-blur-md rounded-lg border border-white/20 p-6 mb-6">
