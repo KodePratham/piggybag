@@ -1,4 +1,5 @@
 import React from 'react';
+import WalletButton from './components/WalletButton';
 
 export default function Home() {
   return (
@@ -14,9 +15,7 @@ export default function Home() {
         
         {/* CTA */}
         <div className="pt-8">
-          <button className="bg-[#6e54ff] text-white px-8 py-4 rounded-full text-lg font-bold hover:opacity-90 transition-all shadow-lg hover:shadow-xl">
-            Connect Wallet
-          </button>
+          <WalletButton />
         </div>
       </div>
     </main>
