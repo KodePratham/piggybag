@@ -557,13 +557,27 @@ export default function AdminPage() {
                     contract: CONTRACT_ADDRESS,
                   });
                   
+                  const avatarUrl = `https://api.dicebear.com/9.x/pixel-art/svg?seed=${ticket.ticketId.toString()}`;
+
                   return (
                     <div
                       key={`${ticket.eventId}-${ticket.ticketId}`}
-                      className="bg-white rounded-lg p-4 cursor-pointer hover:shadow-xl transition"
+                      className="bg-white rounded-lg p-4 cursor-pointer hover:shadow-xl transition overflow-hidden"
                       onClick={() => setSelectedTicket(ticket)}
                     >
-                      <div className="flex justify-center mb-3 bg-white p-2 rounded">
+                      <div className="flex items-center gap-3 mb-3 pb-3 border-b border-gray-100">
+                        <img 
+                          src={avatarUrl} 
+                          alt="Avatar" 
+                          className="w-10 h-10 rounded bg-gray-100"
+                        />
+                        <div className="overflow-hidden">
+                          <p className="font-bold text-gray-800 text-sm truncate">{ticket.eventName}</p>
+                          <p className="text-xs text-gray-500">Ticket #{ticket.ticketId.toString()}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-center mb-3 bg-gray-50 p-2 rounded">
                         <QRCodeSVG 
                           value={qrData} 
                           size={120}
@@ -571,12 +585,10 @@ export default function AdminPage() {
                           includeMargin={false}
                         />
                       </div>
-                      <div className="border-t border-gray-200 pt-3">
-                        <p className="font-bold text-gray-800 text-sm mb-1">{ticket.eventName}</p>
-                        <p className="text-xs text-gray-600">Ticket #{ticket.ticketId.toString()}</p>
+                      <div className="pt-1">
                         <p className="text-xs text-gray-600">Event #{ticket.eventId.toString()}</p>
-                        <p className="text-xs text-gray-500 mt-2 truncate" title={ticket.buyer}>
-                          👤 {ticket.buyer.slice(0, 6)}...{ticket.buyer.slice(-4)}
+                        <p className="text-xs text-gray-500 mt-1 truncate font-mono" title={ticket.buyer}>
+                          👤 {ticket.buyer}
                         </p>
                       </div>
                     </div>
@@ -595,8 +607,18 @@ export default function AdminPage() {
                   className="bg-white rounded-lg p-8 max-w-md w-full"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-2xl font-bold text-gray-800">Ticket Details</h3>
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-4">
+                      <img 
+                        src={`https://api.dicebear.com/9.x/pixel-art/svg?seed=${selectedTicket.ticketId.toString()}`}
+                        alt="Avatar" 
+                        className="w-16 h-16 rounded-lg bg-gray-100 border-2 border-purple-500"
+                      />
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-800">Ticket Details</h3>
+                        <p className="text-sm text-purple-600 font-bold">#{selectedTicket.ticketId.toString()}</p>
+                      </div>
+                    </div>
                     <button
                       onClick={() => setSelectedTicket(null)}
                       className="text-gray-500 hover:text-gray-700 text-2xl"
@@ -605,7 +627,7 @@ export default function AdminPage() {
                     </button>
                   </div>
                   
-                  <div className="flex justify-center mb-6">
+                  <div className="flex justify-center mb-6 bg-gray-50 p-4 rounded-xl">
                     <QRCodeSVG 
                       value={JSON.stringify({
                         ticketId: selectedTicket.ticketId.toString(),

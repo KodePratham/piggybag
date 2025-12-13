@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi';
 import { formatEther, parseEther, createPublicClient, http } from 'viem';
 import { CONTRACT_ADDRESS, ADMIN_ADDRESS, EVENT_TICKETING_ABI } from '../config/contract';
@@ -8,6 +8,7 @@ import { monadTestnet } from '../config/wagmi';
 import WalletButton from '../components/WalletButton';
 import { useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
+import { toPng } from 'html-to-image';
 
 interface Event {
   id: string | bigint;
@@ -37,6 +38,22 @@ export default function EventsPage() {
 
   const isAdmin = address && ADMIN_ADDRESS && address.toLowerCase() === ADMIN_ADDRESS.toLowerCase();
   const isCorrectNetwork = chainId === monadTestnet.id;
+
+  const downloadTicket = useCallback((ticketId: string) => {
+    const node = document.getElementById(`ticket-card-${ticketId}`);
+    if (!node) return;
+
+    toPng(node, { cacheBust: true, backgroundColor: '#ffffff' })
+      .then((dataUrl) => {
+        const link = document.createElement('a');
+        link.download = `monoken-ticket-${ticketId}.png`;
+        link.href = dataUrl;
+        link.click();
+      })
+      .catch((err) => {
+        console.error('Error generating ticket image:', err);
+      });
+  }, []);
 
   // Fetch event IDs directly using public client
   useEffect(() => {
@@ -322,7 +339,7 @@ export default function EventsPage() {
             <h2 className="text-2xl font-semibold text-white mb-4">🎫 My Tickets ({userTickets.length})</h2>
             
             {ticketDetails.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {ticketDetails.map((ticket) => {
                   // Generate unique QR code data for each ticket
                   const qrData = JSON.stringify({
@@ -332,42 +349,88 @@ export default function EventsPage() {
                     contract: CONTRACT_ADDRESS,
                     timestamp: Date.now(),
                   });
+
+                  const avatarUrl = `https://api.dicebear.com/9.x/pixel-art/svg?seed=${ticket.ticketId.toString()}`;
                   
                   return (
                     <div
                       key={ticket.ticketId.toString()}
-                      className="bg-white rounded-lg p-6 shadow-xl"
+                      className="bg-white rounded-xl shadow-xl overflow-hidden transform transition hover:scale-[1.02]"
                     >
-                      {/* QR Code */}
-                      <div className="flex justify-center mb-4 bg-white p-2 rounded">
-                        <QRCodeSVG 
-                          value={qrData} 
-                          size={180}
-                          level="H"
-                          includeMargin={true}
-                          fgColor="#000000"
-                          bgColor="#ffffff"
-                        />
-                      </div>
-                      
-                      {/* Ticket Info */}
-                      <div className="border-t-2 border-dashed border-gray-300 pt-4">
-                        <div className="mb-2">
-                          <h3 className="text-lg font-bold text-gray-800">{ticket.eventName}</h3>
+                      {/* Capture Area */}
+                      <div id={`ticket-card-${ticket.ticketId.toString()}`} className="p-6 bg-white relative">
+                        {/* Decorative top bar */}
+                        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-500 to-pink-500"></div>
+                        
+                        {/* Avatar Header */}
+                        <div className="flex items-center gap-4 mb-6 mt-2">
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-purple-200 rounded-lg blur-sm transform rotate-3"></div>
+                            <img 
+                              src={avatarUrl} 
+                              alt="Ticket Avatar" 
+                              className="relative w-16 h-16 rounded-lg bg-gray-100 border-2 border-white shadow-sm"
+                            />
+                          </div>
+                          <div>
+                            <p className="text-xs text-purple-600 font-bold uppercase tracking-wider mb-1">Web3 Ticket</p>
+                            <h3 className="text-lg font-bold text-gray-900 leading-tight line-clamp-1">{ticket.eventName}</h3>
+                          </div>
                         </div>
-                        <p className="text-gray-600 text-sm mb-2">📍 {ticket.eventLocation}</p>
-                        <p className="text-gray-600 text-sm mb-2">
-                          📅 {new Date(Number(ticket.eventDate) * 1000).toLocaleDateString('en-US', { 
-                            weekday: 'long', 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                        <p className="text-gray-500 text-xs mt-3 font-mono">Ticket #{ticket.ticketId.toString()}</p>
-                        <p className="text-gray-400 text-xs font-mono truncate">Event #{ticket.eventId.toString()}</p>
+
+                        {/* QR Code */}
+                        <div className="flex justify-center mb-6 bg-gray-50 p-4 rounded-xl border-2 border-dashed border-gray-200">
+                          <QRCodeSVG 
+                            value={qrData} 
+                            size={180}
+                            level="H"
+                            includeMargin={true}
+                            fgColor="#000000"
+                            bgColor="#ffffff"
+                          />
+                        </div>
+                        
+                        {/* Ticket Info */}
+                        <div className="space-y-3">
+                          <div className="flex items-center text-gray-600 text-sm bg-gray-50 p-2 rounded-lg">
+                            <span className="w-8 text-center text-lg">📍</span>
+                            <span className="font-medium">{ticket.eventLocation}</span>
+                          </div>
+                          <div className="flex items-center text-gray-600 text-sm bg-gray-50 p-2 rounded-lg">
+                            <span className="w-8 text-center text-lg">📅</span>
+                            <span className="font-medium">
+                              {new Date(Number(ticket.eventDate) * 1000).toLocaleDateString('en-US', { 
+                                weekday: 'short', 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                          
+                          <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
+                            <div className="flex flex-col">
+                              <span className="text-[10px] text-gray-400 uppercase font-bold">Ticket ID</span>
+                              <span className="text-sm font-mono text-gray-600">#{ticket.ticketId.toString()}</span>
+                            </div>
+                            <div className="flex flex-col items-end">
+                              <span className="text-[10px] text-gray-400 uppercase font-bold">Event ID</span>
+                              <span className="text-sm font-mono text-gray-600">#{ticket.eventId.toString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                        <button 
+                          onClick={() => downloadTicket(ticket.ticketId.toString())}
+                          className="w-full flex justify-center items-center gap-2 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg text-sm font-bold transition shadow-md hover:shadow-lg transform active:scale-95"
+                        >
+                          <span>📸</span> Download for Story
+                        </button>
                       </div>
                     </div>
                   );
