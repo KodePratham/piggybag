@@ -32,7 +32,7 @@ export default function WalletButton() {
   if (isConnected && address) {
     return (
       <div className="flex items-center gap-3">
-        <div className="bg-white/90 backdrop-blur-sm border-2 border-white/50 px-6 py-3 rounded-full shadow-lg">
+        <div className="bg-white/90 backdrop-blur-sm border-2 border-white/50 px-6 py-3 rounded-full shadow-lg flex items-center">
           <span className="text-purple-600 font-semibold text-lg">{formatAddress(address)}</span>
         </div>
         <button
