@@ -1,6 +1,6 @@
 import { http, createConfig } from 'wagmi'
 import { mainnet, sepolia } from 'wagmi/chains'
-import { injected, metaMask, coinbaseWallet, walletConnect } from 'wagmi/connectors'
+import { injected, metaMask, coinbaseWallet } from 'wagmi/connectors'
 
 export const config = createConfig({
   chains: [mainnet, sepolia],
@@ -8,9 +8,6 @@ export const config = createConfig({
     injected(),
     metaMask(),
     coinbaseWallet({ appName: 'Monoken' }),
-    walletConnect({ 
-      projectId: process.env.NEXT_PUBLIC_WC_PROJECT_ID || 'YOUR_PROJECT_ID'
-    }),
   ],
   transports: {
     [mainnet.id]: http(),

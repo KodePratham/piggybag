@@ -7,6 +7,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)'],
+        display: ['var(--font-space-grotesk)'],
+      },
       colors: {
         brand: '#6e54ff',
       },
