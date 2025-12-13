@@ -65,27 +65,39 @@ Visit: http://localhost:3000
 
 ---
 
-## 🎫 QR Code Features
+## 🎫 NFT Ticket Features
 
-Every purchased ticket generates a **unique QR code** containing:
+Every purchased ticket is a **unique NFT** with AI-generated artwork and a QR code:
+
+### AI-Generated NFT Avatars (Powered by Pollinations AI)
+- **Unique Digital Art**: Each ticket gets a custom AI-generated avatar
+- **Event-Specific Design**: Artwork reflects the event name and theme
+- **Deterministic Generation**: Same ticket ID always generates the same artwork
+- **High Quality**: 400x400px vibrant, abstract designs
+- **NFT Badge**: Displays ticket number on the artwork
+
+### QR Code Verification
+Every ticket includes a **unique QR code** containing:
 - Ticket ID
 - Event ID
-- Owner address
 - Event name
 - Contract address
 - Timestamp
 
 **Admin Benefits:**
-- Track all ticket purchases
+- Track all ticket purchases with visual NFT cards
 - View buyer information
 - Scan QR codes for event entry verification
 - Monitor ticket sales in real-time
+- Beautiful NFT gallery of all sold tickets
 
 **User Benefits:**
-- Digital ticket with QR code
+- Unique AI-generated NFT artwork for each ticket
+- Digital ticket with embedded QR code
 - Easy verification at events
 - Permanent NFT ownership
 - Beautiful ticket design with event details
+- Collectible digital memorabilia
 
 ---
 

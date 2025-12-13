@@ -333,41 +333,63 @@ export default function EventsPage() {
                     timestamp: Date.now(),
                   });
                   
+                  // Generate unique cyber web3 2D avatar NFT using Pollinations AI
+                  const nftPrompt = encodeURIComponent(
+                    `cyber web3 futuristic 2D avatar character, neon glowing elements, digital blockchain aesthetic, purple and pink cyberpunk style, flat illustration, geometric patterns, tech-inspired design, horizontal banner format`
+                  );
+                  const nftImageUrl = `https://image.pollinations.ai/prompt/${nftPrompt}?width=600&height=300&seed=${ticket.ticketId.toString()}&nologo=true`;
+                  
                   return (
                     <div
                       key={ticket.ticketId.toString()}
-                      className="bg-white rounded-lg p-6 shadow-xl"
+                      className="bg-white rounded-lg overflow-hidden shadow-xl"
                     >
-                      {/* QR Code */}
-                      <div className="flex justify-center mb-4 bg-white p-2 rounded">
-                        <QRCodeSVG 
-                          value={qrData} 
-                          size={180}
-                          level="H"
-                          includeMargin={true}
-                          fgColor="#000000"
-                          bgColor="#ffffff"
+                      {/* AI-Generated NFT Avatar */}
+                      <div className="relative w-full h-48 bg-gradient-to-br from-purple-400 to-pink-400">
+                        <img 
+                          src={nftImageUrl}
+                          alt={`NFT Ticket #${ticket.ticketId.toString()}`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
                         />
-                      </div>
-                      
-                      {/* Ticket Info */}
-                      <div className="border-t-2 border-dashed border-gray-300 pt-4">
-                        <div className="mb-2">
-                          <h3 className="text-lg font-bold text-gray-800">{ticket.eventName}</h3>
+                        <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full">
+                          <span className="text-white text-xs font-bold">NFT #{ticket.ticketId.toString()}</span>
                         </div>
-                        <p className="text-gray-600 text-sm mb-2">📍 {ticket.eventLocation}</p>
-                        <p className="text-gray-600 text-sm mb-2">
-                          📅 {new Date(Number(ticket.eventDate) * 1000).toLocaleDateString('en-US', { 
-                            weekday: 'long', 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                        <p className="text-gray-500 text-xs mt-3 font-mono">Ticket #{ticket.ticketId.toString()}</p>
-                        <p className="text-gray-400 text-xs font-mono truncate">Event #{ticket.eventId.toString()}</p>
+                      </div>
+
+                      {/* Ticket Content */}
+                      <div className="p-6">
+                        {/* QR Code */}
+                        <div className="flex justify-center mb-4 bg-gray-50 p-3 rounded-lg">
+                          <QRCodeSVG 
+                            value={qrData} 
+                            size={140}
+                            level="H"
+                            includeMargin={true}
+                            fgColor="#000000"
+                            bgColor="#ffffff"
+                          />
+                        </div>
+                        
+                        {/* Ticket Info */}
+                        <div className="border-t-2 border-dashed border-gray-300 pt-4">
+                          <div className="mb-2">
+                            <h3 className="text-lg font-bold text-gray-800">{ticket.eventName}</h3>
+                          </div>
+                          <p className="text-gray-600 text-sm mb-2">📍 {ticket.eventLocation}</p>
+                          <p className="text-gray-600 text-sm mb-2">
+                            📅 {new Date(Number(ticket.eventDate) * 1000).toLocaleDateString('en-US', { 
+                              weekday: 'long', 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                          <p className="text-gray-500 text-xs mt-3 font-mono">Ticket #{ticket.ticketId.toString()}</p>
+                          <p className="text-gray-400 text-xs font-mono truncate">Event #{ticket.eventId.toString()}</p>
+                        </div>
                       </div>
                     </div>
                   );

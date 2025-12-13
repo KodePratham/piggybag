@@ -38,6 +38,7 @@ export default function AdminPage() {
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
+  const [mounted, setMounted] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -51,6 +52,10 @@ export default function AdminPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<TicketPurchase | null>(null);
   const [activeTab, setActiveTab] = useState<'create' | 'tickets' | 'events'>('create');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Check if user is admin
   const isAdmin = address && ADMIN_ADDRESS && address.toLowerCase() === ADMIN_ADDRESS.toLowerCase();
@@ -226,6 +231,25 @@ export default function AdminPage() {
       alert('Error withdrawing funds. Check console for details.');
     }
   };
+
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen w-full relative">
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            background: "radial-gradient(125% 125% at 50% 10%, #1f2937 40%, #7c3aed 100%)",
+          }}
+        />
+        <div className="relative z-10 flex items-center justify-center min-h-screen">
+          <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg border border-white/20">
+            <p className="text-white">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!CONTRACT_ADDRESS) {
     return (
@@ -557,23 +581,43 @@ export default function AdminPage() {
                     contract: CONTRACT_ADDRESS,
                   });
                   
+                  // Generate unique cyber web3 2D avatar NFT using Pollinations AI
+                  const nftPrompt = encodeURIComponent(
+                    `cyber web3 futuristic 2D avatar character, neon glowing elements, digital blockchain aesthetic, purple and pink cyberpunk style, flat illustration, geometric patterns, tech-inspired design, horizontal banner format`
+                  );
+                  const nftImageUrl = `https://image.pollinations.ai/prompt/${nftPrompt}?width=600&height=300&seed=${ticket.ticketId.toString()}&nologo=true`;
+                  
                   return (
                     <div
                       key={`${ticket.eventId}-${ticket.ticketId}`}
-                      className="bg-white rounded-lg p-4 cursor-pointer hover:shadow-xl transition"
+                      className="bg-white rounded-lg overflow-hidden cursor-pointer hover:shadow-xl transition"
                       onClick={() => setSelectedTicket(ticket)}
                     >
-                      <div className="flex justify-center mb-3 bg-white p-2 rounded">
-                        <QRCodeSVG 
-                          value={qrData} 
-                          size={120}
-                          level="H"
-                          includeMargin={false}
+                      {/* AI-Generated NFT Avatar */}
+                      <div className="relative w-full h-32 bg-gradient-to-br from-purple-400 to-pink-400">
+                        <img 
+                          src={nftImageUrl}
+                          alt={`NFT Ticket #${ticket.ticketId.toString()}`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
                         />
+                        <div className="absolute top-1 right-1 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                          <span className="text-white text-xs font-bold">NFT #{ticket.ticketId.toString()}</span>
+                        </div>
                       </div>
-                      <div className="border-t border-gray-200 pt-3">
-                        <p className="font-bold text-gray-800 text-sm mb-1">{ticket.eventName}</p>
-                        <p className="text-xs text-gray-600">Ticket #{ticket.ticketId.toString()}</p>
+
+                      <div className="p-4">
+                        <div className="flex justify-center mb-3 bg-gray-50 p-2 rounded">
+                          <QRCodeSVG 
+                            value={qrData} 
+                            size={100}
+                            level="H"
+                            includeMargin={false}
+                          />
+                        </div>
+                        <div className="border-t border-gray-200 pt-3">
+                          <p className="font-bold text-gray-800 text-sm mb-1">{ticket.eventName}</p>
+                          <p className="text-xs text-gray-600">Ticket #{ticket.ticketId.toString()}</p>
                         <p className="text-xs text-gray-600">Event #{ticket.eventId.toString()}</p>
                         <p className="text-xs text-gray-500 mt-2 truncate" title={ticket.buyer}>
                           👤 {ticket.buyer.slice(0, 6)}...{ticket.buyer.slice(-4)}
@@ -592,33 +636,48 @@ export default function AdminPage() {
                 onClick={() => setSelectedTicket(null)}
               >
                 <div
-                  className="bg-white rounded-lg p-8 max-w-md w-full"
+                  className="bg-white rounded-lg overflow-hidden max-w-md w-full"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-2xl font-bold text-gray-800">Ticket Details</h3>
-                    <button
-                      onClick={() => setSelectedTicket(null)}
-                      className="text-gray-500 hover:text-gray-700 text-2xl"
-                    >
-                      ×
-                    </button>
-                  </div>
-                  
-                  <div className="flex justify-center mb-6">
-                    <QRCodeSVG 
-                      value={JSON.stringify({
-                        ticketId: selectedTicket.ticketId.toString(),
-                        eventId: selectedTicket.eventId.toString(),
-                        buyer: selectedTicket.buyer,
-                        eventName: selectedTicket.eventName,
-                        contract: CONTRACT_ADDRESS,
-                      })} 
-                      size={200}
-                      level="H"
-                      includeMargin={true}
+                  {/* AI-Generated NFT Avatar - Large */}
+                  <div className="relative w-full h-64 bg-gradient-to-br from-purple-400 to-pink-400">
+                    <img 
+                      src={`https://image.pollinations.ai/prompt/${encodeURIComponent(
+                        `cyber web3 futuristic 2D avatar character, neon glowing elements, digital blockchain aesthetic, purple and pink cyberpunk style, flat illustration, geometric patterns, tech-inspired design, horizontal banner format`
+                      )}?width=1200&height=600&seed=${selectedTicket.ticketId.toString()}&nologo=true`}
+                      alt={`NFT Ticket #${selectedTicket.ticketId.toString()}`}
+                      className="w-full h-full object-cover"
                     />
+                    <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm px-4 py-2 rounded-full">
+                      <span className="text-white text-sm font-bold">NFT #{selectedTicket.ticketId.toString()}</span>
+                    </div>
                   </div>
+
+                  <div className="p-8">
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-2xl font-bold text-gray-800">Ticket Details</h3>
+                      <button
+                        onClick={() => setSelectedTicket(null)}
+                        className="text-gray-500 hover:text-gray-700 text-2xl"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    
+                    <div className="flex justify-center mb-6 bg-gray-50 p-4 rounded-lg">
+                      <QRCodeSVG 
+                        value={JSON.stringify({
+                          ticketId: selectedTicket.ticketId.toString(),
+                          eventId: selectedTicket.eventId.toString(),
+                          buyer: selectedTicket.buyer,
+                          eventName: selectedTicket.eventName,
+                          contract: CONTRACT_ADDRESS,
+                        })} 
+                        size={180}
+                        level="H"
+                        includeMargin={true}
+                      />
+                    </div>
                   
                   <div className="space-y-3">
                     <div>
