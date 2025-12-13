@@ -4,10 +4,13 @@ import React from 'react';
 import dynamic from 'next/dynamic';
 import WalletButton from './components/WalletButton';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 const Dither = dynamic(() => import('./components/Dither'), { ssr: false });
 
 export default function Home() {
+  const router = useRouter();
+
   return (
     <main className="relative min-h-screen w-full overflow-hidden">
       {/* Dithered Waves Background - Full Screen */}
@@ -65,8 +68,14 @@ export default function Home() {
             A comprehensive event ecosystem on Monad. Beyond ticketing- claim NFT rewards, verify authentic merchandise, and trade tickets in a fair, regulated marketplace.
           </p>
           
-          {/* Connect Wallet Button */}
-          <div className="pt-8 pointer-events-auto">
+          {/* Action Buttons */}
+          <div className="pt-8 pointer-events-auto flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <button
+              onClick={() => router.push('/events')}
+              className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg text-white font-semibold text-lg transition transform hover:scale-105 shadow-lg"
+            >
+              🎫 Browse Events
+            </button>
             <WalletButton />
           </div>
         </div>

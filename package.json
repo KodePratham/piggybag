@@ -10,7 +10,9 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "node": "hardhat node",
-    "deploy": "hardhat run scripts/deploy.js"
+    "deploy": "hardhat run scripts/deploy.ts --network monadTestnet",
+    "deploy:local": "hardhat run scripts/deploy.ts --network hardhat",
+    "verify": "hardhat verify --network monadTestnet"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
