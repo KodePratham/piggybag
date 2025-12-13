@@ -27,7 +27,10 @@
         "./*"
       ]
     },
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "next-env.d.ts",
@@ -36,6 +39,10 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "test",
+    "scripts",
+    "hardhat.config.ts",
+    "typechain-types"
   ]
 }
