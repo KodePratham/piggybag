@@ -35,3 +35,12 @@ bun run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the app.
+
+### Supabase setup
+
+1. Run the SQL in [`piggybag-web/supabase/users.sql`](piggybag-web/supabase/users.sql) in the Supabase SQL editor.
+2. Copy `.env.example` to `.env.local` and set:
+   - `NEXT_PUBLIC_SUPABASE_URL` — your Supabase project URL
+   - `SUPABASE_SERVICE_ROLE_KEY` — service role key (server-only, never expose to the client)
+
+Connected wallets are upserted into the `users` table automatically.
