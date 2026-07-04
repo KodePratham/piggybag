@@ -2,6 +2,7 @@ import Image from "next/image";
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { BlitzApplyForm } from "@/components/BlitzApplyForm";
 import { AddBlitzToWallet } from "@/components/AddBlitzToWallet";
+import { BlitzBalance } from "@/components/BlitzBalance";
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return <p className="pb-label">{children}</p>;
@@ -61,6 +62,7 @@ export default function MonadBlitzPage() {
               <ConnectWallet />
               <span className="text-sm text-[#8a8794]">Monad testnet required</span>
             </div>
+            <BlitzBalance />
             <BlitzApplyForm />
           </div>
         </div>
