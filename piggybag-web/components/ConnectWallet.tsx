@@ -2,7 +2,7 @@
 
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
 import { monadTestnet } from "viem/chains";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMounted } from "@/lib/useMounted";
 
 function truncateAddress(address: string) {
@@ -16,6 +16,20 @@ export function ConnectWallet() {
   const { disconnect } = useDisconnect();
   const { switchChain } = useSwitchChain();
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isConnected || !address) {
+      return;
+    }
+
+    fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ address }),
+    }).catch((err) => {
+      console.error("Failed to register wallet:", err);
+    });
+  }, [address, isConnected]);
 
   async function handleConnect() {
     setError(null);
