@@ -3,13 +3,20 @@
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
 import { monadTestnet } from "viem/chains";
 import { useEffect, useState } from "react";
+import { Button } from "@astryxdesign/core/Button";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Text } from "@astryxdesign/core/Text";
 import { useMounted } from "@/lib/useMounted";
 
 function truncateAddress(address: string) {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
-export function ConnectWallet() {
+type ConnectWalletProps = {
+  compact?: boolean;
+};
+
+export function ConnectWallet({ compact = false }: ConnectWalletProps) {
   const mounted = useMounted();
   const { address, isConnected } = useAccount();
   const { connect, connectors, isPending } = useConnect();
@@ -61,44 +68,45 @@ export function ConnectWallet() {
 
   if (!mounted) {
     return (
-      <div className="flex flex-col items-center gap-3">
-        <button
-          type="button"
-          disabled
-          className="border border-black px-8 py-3 text-sm uppercase tracking-widest transition-colors hover:bg-black hover:text-white disabled:opacity-50"
-        >
-          Connect Wallet
-        </button>
-      </div>
+      <Button
+        label={compact ? "Connect" : "Connect Wallet"}
+        variant="secondary"
+        size={compact ? "sm" : "md"}
+        isDisabled
+      />
     );
   }
 
   if (isConnected && address) {
     return (
-      <div className="flex flex-col items-center gap-3">
-        <p className="font-mono text-sm tracking-wide">{truncateAddress(address)}</p>
-        <button
-          type="button"
+      <HStack gap={2} align="center">
+        <Text type="label" color="secondary">
+          {truncateAddress(address)}
+        </Text>
+        <Button
+          label="Disconnect"
+          variant="ghost"
+          size="sm"
           onClick={() => disconnect()}
-          className="text-xs uppercase tracking-widest text-black/60 underline-offset-4 hover:underline"
-        >
-          Disconnect
-        </button>
-      </div>
+        />
+      </HStack>
     );
   }
 
   return (
-    <div className="flex flex-col items-center gap-3">
-      <button
-        type="button"
+    <HStack gap={2} align="center">
+      <Button
+        label={isPending ? "Connecting…" : compact ? "Connect" : "Connect Wallet"}
+        variant="primary"
+        size={compact ? "sm" : "md"}
+        isLoading={isPending}
         onClick={handleConnect}
-        disabled={isPending}
-        className="border border-black px-8 py-3 text-sm uppercase tracking-widest transition-colors hover:bg-black hover:text-white disabled:opacity-50"
-      >
-        {isPending ? "Connecting…" : "Connect Wallet"}
-      </button>
-      {error && <p className="max-w-xs text-center text-xs text-black/60">{error}</p>}
-    </div>
+      />
+      {error && (
+        <Text type="supporting" color="secondary">
+          {error}
+        </Text>
+      )}
+    </HStack>
   );
 }
