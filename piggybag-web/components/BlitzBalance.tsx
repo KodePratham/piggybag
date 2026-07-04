@@ -1,5 +1,6 @@
 "use client";
 
+import { formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 import { monadTestnet } from "viem/chains";
 import { Link } from "@astryxdesign/core/Link";
@@ -20,8 +21,9 @@ const BALANCE_OF_ABI = [
 ] as const;
 
 function formatBlitz(raw: bigint): string {
-  const whole = raw / 10n ** 18n;
-  return whole.toLocaleString();
+  const formatted = formatUnits(raw, 18);
+  const whole = formatted.split(".")[0] ?? "0";
+  return Number(whole).toLocaleString();
 }
 
 export function BlitzBalance() {
@@ -61,7 +63,7 @@ export function BlitzBalance() {
       ) : (
         <div className="flex items-baseline gap-1">
           <span className="text-2xl font-semibold">
-            {formatBlitz((data as bigint | undefined) ?? 0n)}
+            {formatBlitz((data as bigint | undefined) ?? BigInt(0))}
           </span>
           <span className="text-sm text-[#8a8794]">$BLITZ</span>
         </div>
