@@ -1,8 +1,33 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { isAddress } from "viem";
-import { createBlitzProject } from "@/lib/blitzProjects";
+import {
+  BlitzAlreadySubmittedError,
+  createBlitzProject,
+  getBlitzProjectForWallet,
+} from "@/lib/blitzProjects";
 
 export const maxDuration = 60;
+
+export async function GET(request: NextRequest) {
+  const address = request.nextUrl.searchParams.get("address");
+
+  if (!address || !isAddress(address)) {
+    return NextResponse.json({ error: "A valid wallet address is required." }, { status: 400 });
+  }
+
+  try {
+    const project = await getBlitzProjectForWallet(address.toLowerCase());
+
+    if (!project) {
+      return NextResponse.json({ error: "No blitz project found for this wallet." }, { status: 404 });
+    }
+
+    return NextResponse.json(project);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to load blitz project.";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
 
 export async function POST(request: NextRequest) {
   let body: {
@@ -42,6 +67,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
+    if (error instanceof BlitzAlreadySubmittedError) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
+
     const message = error instanceof Error ? error.message : "Failed to process blitz project.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
