@@ -2,6 +2,16 @@
 
 import { useAccount } from "wagmi";
 import { useState } from "react";
+import { Badge } from "@astryxdesign/core/Badge";
+import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
+import { Divider } from "@astryxdesign/core/Divider";
+import { Heading } from "@astryxdesign/core/Heading";
+import { Link } from "@astryxdesign/core/Link";
+import { Text } from "@astryxdesign/core/Text";
+import { TextArea } from "@astryxdesign/core/TextArea";
+import { TextInput } from "@astryxdesign/core/TextInput";
+import { VStack } from "@astryxdesign/core/VStack";
 import { useMounted } from "@/lib/useMounted";
 import { postJson } from "@/lib/apiClient";
 
@@ -22,6 +32,18 @@ type ApplicationState = {
   hash?: string;
   turnsRemaining: number;
 };
+
+function statusBadgeVariant(status: AgentStatus): "info" | "success" | "error" {
+  if (status === "approved") return "success";
+  if (status === "rejected") return "error";
+  return "info";
+}
+
+function statusLabel(status: AgentStatus): string {
+  if (status === "approved") return "Approved";
+  if (status === "rejected") return "Not funded";
+  return "In review";
+}
 
 export function FundingAgent() {
   const mounted = useMounted();
@@ -132,45 +154,51 @@ export function FundingAgent() {
 
   if (!application) {
     return (
-      <div className="mt-8 flex w-full max-w-md flex-col items-center gap-6 border-t border-black/10 pt-8">
-        <p className="text-xs uppercase tracking-widest text-black/60">Apply for funding</p>
+      <Card maxWidth={560} width="100%" padding={5}>
+        <VStack gap={4} align="stretch">
+          <VStack gap={1} align="stretch">
+            <Heading level={3}>Tell us about your project</Heading>
+            <Text type="supporting" color="secondary">
+              Share your GitHub and project details. The PiggyBag agent will ask a few follow-up
+              questions before deciding.
+            </Text>
+          </VStack>
 
-        <form onSubmit={handleSubmitApplication} className="flex w-full flex-col gap-4">
-          <label className="flex flex-col gap-2 text-left">
-            <span className="text-xs uppercase tracking-widest text-black/60">GitHub</span>
-            <input
-              type="text"
-              value={github}
-              onChange={(e) => setGithub(e.target.value)}
-              placeholder="github.com/username"
-              required
-              className="border border-black/20 px-4 py-3 text-sm outline-none focus:border-black"
-            />
-          </label>
+          <form onSubmit={handleSubmitApplication}>
+            <VStack gap={4} align="stretch">
+              <TextInput
+                label="GitHub"
+                value={github}
+                onChange={setGithub}
+                placeholder="github.com/username"
+                isRequired
+              />
 
-          <label className="flex flex-col gap-2 text-left">
-            <span className="text-xs uppercase tracking-widest text-black/60">Project</span>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe what you're building..."
-              required
-              rows={4}
-              className="resize-none border border-black/20 px-4 py-3 text-sm outline-none focus:border-black"
-            />
-          </label>
+              <TextArea
+                label="Project"
+                value={description}
+                onChange={setDescription}
+                placeholder="Describe what you're building..."
+                rows={4}
+                isRequired
+              />
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="border border-black px-8 py-3 text-sm uppercase tracking-widest transition-colors hover:bg-black hover:text-white disabled:opacity-50"
-          >
-            {isLoading ? "Submitting…" : "Submit application"}
-          </button>
-        </form>
+              <Button
+                label={isLoading ? "Submitting…" : "Submit application"}
+                variant="primary"
+                type="submit"
+                isLoading={isLoading}
+              />
+            </VStack>
+          </form>
 
-        {error && <p className="max-w-xs text-center text-xs text-black/60">{error}</p>}
-      </div>
+          {error && (
+            <Text type="supporting" color="secondary">
+              {error}
+            </Text>
+          )}
+        </VStack>
+      </Card>
     );
   }
 
@@ -178,97 +206,98 @@ export function FundingAgent() {
   const isLastQuestion = application.turnsRemaining <= 1;
 
   return (
-    <div className="mt-8 flex w-full max-w-md flex-col items-center gap-6 border-t border-black/10 pt-8">
-      <p className="text-xs uppercase tracking-widest text-black/60">PiggyBag agent</p>
+    <Card maxWidth={560} width="100%" padding={5}>
+      <VStack gap={4} align="stretch">
+        <VStack gap={2} align="stretch">
+          <Heading level={3}>PiggyBag agent</Heading>
+          <Badge label={statusLabel(application.status)} variant={statusBadgeVariant(application.status)} />
+        </VStack>
 
-      {!isFinalized && application.turnsRemaining > 0 && (
-        <p className="text-xs text-black/60">
-          {isLastQuestion
-            ? "Final answer — the agent will decide and send funds immediately if approved."
-            : `${application.turnsRemaining} answer${application.turnsRemaining === 1 ? "" : "s"} remaining before decision`}
-        </p>
-      )}
+        {!isFinalized && application.turnsRemaining > 0 && (
+          <Text type="supporting" color="secondary">
+            {isLastQuestion
+              ? "Final answer — the agent will decide and send funds immediately if approved."
+              : `${application.turnsRemaining} answer${application.turnsRemaining === 1 ? "" : "s"} remaining before decision`}
+          </Text>
+        )}
 
-      <div className="flex w-full flex-col gap-4">
-        {application.messages.map((message, index) => (
-          <div
-            key={index}
-            className={`text-sm ${message.role === "assistant" ? "text-black" : "text-black/60"}`}
-          >
-            <p className="mb-1 text-xs uppercase tracking-widest">
-              {message.role === "assistant" ? "Agent" : "You"}
-            </p>
-            <p>{message.content}</p>
-          </div>
-        ))}
-      </div>
-
-      {application.status === "approved" && (
-        <div className="flex w-full flex-col items-center gap-2 text-center">
-          <p className="text-xs uppercase tracking-widest text-black/60">Approved</p>
-          <p className="text-sm">
-            {application.amountMon} MON sent to your wallet.
-          </p>
-          {application.hash && (
-            <a
-              href={`${EXPLORER_TX_URL}${application.hash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono text-xs text-black underline-offset-4 hover:underline"
+        <VStack gap={3} align="stretch">
+          {application.messages.map((message, index) => (
+            <Card
+              key={index}
+              variant={message.role === "assistant" ? "muted" : "default"}
+              padding={3}
             >
-              View transaction
-            </a>
-          )}
-        </div>
-      )}
+              <VStack gap={1} align="stretch">
+                <Text type="label" color="secondary">
+                  {message.role === "assistant" ? "Agent" : "You"}
+                </Text>
+                <Text type="body">{message.content}</Text>
+              </VStack>
+            </Card>
+          ))}
+        </VStack>
 
-      {application.status === "rejected" && (
-        <div className="flex w-full flex-col items-center gap-2 text-center">
-          <p className="text-xs uppercase tracking-widest text-black/60">Not funded</p>
-        </div>
-      )}
+        {application.status === "approved" && (
+          <VStack gap={2} align="center">
+            <Text type="body" weight="medium">
+              {application.amountMon} MON sent to your wallet.
+            </Text>
+            {application.hash && (
+              <Link
+                href={`${EXPLORER_TX_URL}${application.hash}`}
+                isExternalLink
+                label="View transaction"
+              >
+                View transaction
+              </Link>
+            )}
+          </VStack>
+        )}
 
-      {!isFinalized && (
-        <form onSubmit={handleSubmitAnswer} className="flex w-full flex-col gap-4">
-          <label className="flex flex-col gap-2 text-left">
-            <span className="text-xs uppercase tracking-widest text-black/60">Your answer</span>
-            <textarea
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              placeholder="Answer the agent's question..."
-              required
-              rows={3}
-              className="resize-none border border-black/20 px-4 py-3 text-sm outline-none focus:border-black"
-            />
-          </label>
+        {!isFinalized && (
+          <>
+            <Divider />
+            <form onSubmit={handleSubmitAnswer}>
+              <VStack gap={4} align="stretch">
+                <TextArea
+                  label="Your answer"
+                  value={answer}
+                  onChange={setAnswer}
+                  placeholder="Answer the agent's question..."
+                  rows={3}
+                  isRequired
+                />
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="border border-black px-8 py-3 text-sm uppercase tracking-widest transition-colors hover:bg-black hover:text-white disabled:opacity-50"
-          >
-            {isLoading
-              ? isLastQuestion
-                ? "Deciding & sending…"
-                : "Sending…"
-              : isLastQuestion
-                ? "Submit final answer"
-                : "Send answer"}
-          </button>
-        </form>
-      )}
+                <Button
+                  label={
+                    isLoading
+                      ? isLastQuestion
+                        ? "Deciding & sending…"
+                        : "Sending…"
+                      : isLastQuestion
+                        ? "Submit final answer"
+                        : "Send answer"
+                  }
+                  variant="primary"
+                  type="submit"
+                  isLoading={isLoading}
+                />
+              </VStack>
+            </form>
+          </>
+        )}
 
-      {error && <p className="max-w-xs text-center text-xs text-black/60">{error}</p>}
+        {error && (
+          <Text type="supporting" color="secondary">
+            {error}
+          </Text>
+        )}
 
-      {isFinalized && (
-        <button
-          type="button"
-          onClick={handleNewApplication}
-          className="text-xs uppercase tracking-widest text-black/60 underline-offset-4 hover:underline"
-        >
-          New application
-        </button>
-      )}
-    </div>
+        {isFinalized && (
+          <Button label="New application" variant="ghost" onClick={handleNewApplication} />
+        )}
+      </VStack>
+    </Card>
   );
 }
