@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useAccount, useSwitchChain, useWatchAsset } from "wagmi";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
@@ -14,7 +14,7 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { VStack } from "@astryxdesign/core/VStack";
 import { addBlitzToMetaMask } from "@/lib/addBlitzToMetaMask";
 import { useMounted } from "@/lib/useMounted";
-import { postJson } from "@/lib/apiClient";
+import { getJson, postJson } from "@/lib/apiClient";
 import { AddBlitzToWallet } from "@/components/AddBlitzToWallet";
 
 const EXPLORER_TX_URL = "https://testnet.monadscan.com/tx/";
@@ -24,6 +24,7 @@ type BlitzResult = {
   txHash: string;
   amountBlitz: number;
   tokenAddress: string;
+  compliment: string;
 };
 
 export function BlitzApplyForm() {
@@ -38,6 +39,46 @@ export function BlitzApplyForm() {
   const [result, setResult] = useState<BlitzResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingExisting, setIsCheckingExisting] = useState(false);
+
+  useEffect(() => {
+    if (!mounted || !isConnected || !address) {
+      return;
+    }
+
+    const walletAddress = address;
+    let cancelled = false;
+
+    async function loadExistingProject() {
+      setIsCheckingExisting(true);
+      setError(null);
+      setResult(null);
+
+      const response = await getJson<BlitzResult>(
+        `/api/blitz?address=${encodeURIComponent(walletAddress)}`,
+      );
+
+      if (cancelled) {
+        return;
+      }
+
+      if (response.ok) {
+        setResult(response.data);
+      } else if (response.error !== "No blitz project found for this wallet.") {
+        setError(response.error);
+      } else {
+        setResult(null);
+      }
+
+      setIsCheckingExisting(false);
+    }
+
+    void loadExistingProject();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted, isConnected, address]);
 
   if (!mounted || !isConnected || !address) {
     return null;
@@ -77,43 +118,64 @@ export function BlitzApplyForm() {
     }
   }
 
-  function handleNewSubmission() {
-    setResult(null);
-    setGithub("");
-    setDescription("");
-    setWorkingLink("");
-    setError(null);
+  if (isCheckingExisting) {
+    return (
+      <Card maxWidth={560} width="100%" padding={5}>
+        <VStack gap={2} align="center">
+          <Text type="supporting" color="secondary">
+            Checking for an existing submission…
+          </Text>
+        </VStack>
+      </Card>
+    );
   }
 
   if (result) {
     return (
       <Card maxWidth={560} width="100%" padding={5}>
-        <VStack gap={4} align="center">
-          <Image
-            src="/blitzcoin.png"
-            alt="$BLITZ"
-            width={72}
-            height={72}
-            className="rounded-full"
-          />
-          <Badge label="Reward sent" variant="success" />
-          <Heading level={3}>
-            {result.amountBlitz.toLocaleString()} $BLITZ sent
-          </Heading>
-          <Text type="supporting" color="secondary">
-            Approve the MetaMask prompt to see your $BLITZ in your wallet.
-          </Text>
-          {result.txHash && (
-            <Link
-              href={`${EXPLORER_TX_URL}${result.txHash}`}
-              isExternalLink
-              label="View transaction"
-            >
-              View transaction
-            </Link>
+        <VStack gap={4} align="stretch">
+          <VStack gap={2} align="stretch">
+            <Heading level={3}>PiggyBag agent</Heading>
+            <Badge label="Project submitted" variant="success" />
+          </VStack>
+
+          {result.compliment && (
+            <Card variant="muted" padding={3}>
+              <VStack gap={1} align="stretch">
+                <Text type="label" color="secondary">
+                  Agent
+                </Text>
+                <Text type="body">{result.compliment}</Text>
+              </VStack>
+            </Card>
           )}
-          <AddBlitzToWallet tokenAddress={result.tokenAddress} />
-          <Button label="Submit another project" variant="ghost" onClick={handleNewSubmission} />
+
+          <VStack gap={4} align="center">
+            <Image
+              src="/blitzcoin.png"
+              alt="$BLITZ"
+              width={72}
+              height={72}
+              className="rounded-full"
+            />
+            <Badge label="Reward sent" variant="success" />
+            <Heading level={3}>
+              {result.amountBlitz.toLocaleString()} $BLITZ sent
+            </Heading>
+            <Text type="supporting" color="secondary">
+              Approve the MetaMask prompt to see your $BLITZ in your wallet.
+            </Text>
+            {result.txHash && (
+              <Link
+                href={`${EXPLORER_TX_URL}${result.txHash}`}
+                isExternalLink
+                label="View transaction"
+              >
+                View transaction
+              </Link>
+            )}
+            <AddBlitzToWallet tokenAddress={result.tokenAddress} />
+          </VStack>
         </VStack>
       </Card>
     );
@@ -125,7 +187,8 @@ export function BlitzApplyForm() {
         <VStack gap={1} align="stretch">
           <Heading level={3}>Submit your Monad Blitz project</Heading>
           <Text type="supporting" color="secondary">
-            Share your repo and description. You&apos;ll receive 10,000 $BLITZ instantly on
+            Share your repo and description. One project per wallet — the PiggyBag agent
+            will share a compliment, and you&apos;ll receive 10,000 $BLITZ instantly on
             submit.
           </Text>
         </VStack>

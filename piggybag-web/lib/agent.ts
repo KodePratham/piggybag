@@ -145,3 +145,81 @@ GitHub: ${github}
 Project description:
 ${description}`;
 }
+
+const BLITZ_COMPLIMENT_SYSTEM_PROMPT = `You are PiggyBag, an autonomous early-stage VC agent on Monad testnet.
+
+A builder just submitted their Monad Blitz hackathon project. Your job is to give them one genuine, specific compliment about what they built.
+
+Guidelines:
+- Write 2-4 sentences in a warm, encouraging tone.
+- Reference something specific from their GitHub, description, or demo link when possible.
+- Do NOT ask questions, give advice, or mention funding decisions.
+- Do NOT criticize or hedge — this is a celebration moment.`;
+
+const blitzComplimentSchema = {
+  type: "object" as const,
+  properties: {
+    compliment: { type: "string" as const },
+  },
+  required: ["compliment"],
+  additionalProperties: false,
+};
+
+const FALLBACK_BLITZ_COMPLIMENT =
+  "Love seeing builders ship on Monad — your project shows real initiative and the kind of hands-on energy the ecosystem needs.";
+
+function buildBlitzProjectMessage(params: {
+  github: string;
+  description: string;
+  workingLink?: string | null;
+}): string {
+  const lines = [
+    "Monad Blitz project submission:",
+    "",
+    `GitHub: ${params.github}`,
+    "",
+    "Project description:",
+    params.description,
+  ];
+
+  if (params.workingLink?.trim()) {
+    lines.push("", `Working link: ${params.workingLink.trim()}`);
+  }
+
+  return lines.join("\n");
+}
+
+export async function generateBlitzCompliment(params: {
+  github: string;
+  description: string;
+  workingLink?: string | null;
+}): Promise<string> {
+  try {
+    const response = await getOpenAIClient().chat.completions.create({
+      model: MODEL,
+      messages: [
+        { role: "system", content: BLITZ_COMPLIMENT_SYSTEM_PROMPT },
+        { role: "user", content: buildBlitzProjectMessage(params) },
+      ],
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "blitz_compliment",
+          strict: true,
+          schema: blitzComplimentSchema,
+        },
+      },
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      return FALLBACK_BLITZ_COMPLIMENT;
+    }
+
+    const parsed = JSON.parse(content) as { compliment: string };
+    const compliment = parsed.compliment?.trim();
+    return compliment || FALLBACK_BLITZ_COMPLIMENT;
+  } catch {
+    return FALLBACK_BLITZ_COMPLIMENT;
+  }
+}

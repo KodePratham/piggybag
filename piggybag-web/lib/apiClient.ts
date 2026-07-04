@@ -38,3 +38,24 @@ export async function postJson<T>(url: string, body: unknown): Promise<{ ok: tru
 
   return { ok: true, data };
 }
+
+export async function getJson<T>(url: string): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
+  let response: Response;
+
+  try {
+    response = await fetch(url);
+  } catch {
+    return {
+      ok: false,
+      error: "Could not reach the server. Make sure the dev server is running and restart it after changing .env.local.",
+    };
+  }
+
+  const data = await parseJsonResponse<{ error?: string } & T>(response);
+
+  if (!response.ok) {
+    return { ok: false, error: data.error || "Request failed." };
+  }
+
+  return { ok: true, data };
+}

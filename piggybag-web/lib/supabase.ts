@@ -42,6 +42,7 @@ export type BlitzProjectRow = {
   status: string;
   amount_blitz: number | null;
   tx_hash: string | null;
+  compliment: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -54,14 +55,19 @@ export type BlitzProjectInsert = {
   status: string;
   amount_blitz?: number | null;
   tx_hash?: string | null;
+  compliment?: string | null;
 };
 
 export type BlitzProjectUpdate = {
   status: string;
   amount_blitz?: number | null;
   tx_hash?: string | null;
+  compliment?: string | null;
   updated_at: string;
 };
+
+const BLITZ_PROJECT_COLUMNS =
+  "id, wallet_address, github, description, working_link, status, amount_blitz, tx_hash, compliment, created_at, updated_at";
 
 export type UserProfileRow = {
   id: string;
@@ -195,6 +201,26 @@ export async function updateBlitzProject(id: string, row: BlitzProjectUpdate): P
     }
   } catch (error) {
     throw wrapSupabaseError(error, "updating blitz project");
+  }
+}
+
+export async function getBlitzProjectByWallet(
+  walletAddress: string,
+): Promise<BlitzProjectRow | null> {
+  try {
+    const { data, error } = await getSupabaseAdmin()
+      .from("blitz_projects")
+      .select(BLITZ_PROJECT_COLUMNS)
+      .eq("wallet_address", walletAddress)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data as BlitzProjectRow | null;
+  } catch (error) {
+    throw wrapSupabaseError(error, "loading blitz project");
   }
 }
 

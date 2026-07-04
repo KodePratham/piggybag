@@ -1,3 +1,4 @@
+import { getAddress } from "viem";
 import { monadTestnet } from "viem/chains";
 
 type EthereumProvider = {
@@ -33,10 +34,12 @@ function getEthereumProvider(): EthereumProvider | undefined {
 }
 
 function buildWatchAssetParams(tokenAddress: string): WatchAssetParams {
+  const checksummed = getAddress(tokenAddress);
+
   return {
     type: "ERC20",
     options: {
-      address: tokenAddress as `0x${string}`,
+      address: checksummed,
       symbol: "BLITZ",
       decimals: 18,
       image: `${window.location.origin}/blitzcoin.png`,
@@ -97,23 +100,29 @@ export async function addBlitzToMetaMask(
   }
 
   const params = buildWatchAssetParams(address);
-  const provider = getEthereumProvider();
 
+  if (deps?.switchChain) {
+    try {
+      await deps.switchChain({ chainId: monadTestnet.id });
+    } catch {
+      // User may already be on Monad testnet.
+    }
+  }
+
+  if (deps?.watchAssetAsync) {
+    const added = await deps.watchAssetAsync(params);
+    if (added) {
+      return;
+    }
+  }
+
+  const provider = getEthereumProvider();
   if (provider) {
     await ensureMonadTestnet(provider, deps?.switchChain);
     await provider.request({
       method: "wallet_watchAsset",
       params,
     });
-    return;
-  }
-
-  if (deps?.switchChain) {
-    await deps.switchChain({ chainId: monadTestnet.id });
-  }
-
-  if (deps?.watchAssetAsync) {
-    await deps.watchAssetAsync(params);
     return;
   }
 

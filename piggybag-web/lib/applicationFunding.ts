@@ -1,7 +1,7 @@
 import { parseEther } from "viem";
 import { monadTestnet } from "viem/chains";
 import type { AgentDecision } from "@/lib/agent";
-import { getAgentPrivateKey } from "@/lib/env";
+import { getAgentPrivateKey, getMonadRpcUrl } from "@/lib/env";
 import {
   createPublicClient,
   createWalletClient,
@@ -14,9 +14,14 @@ import { privateKeyToAccount, type PrivateKeyAccount } from "viem/accounts";
 let account: PrivateKeyAccount | null = null;
 let walletClient: ReturnType<typeof createWalletClient> | null = null;
 
+const MONAD_RPC_TIMEOUT_MS = 45_000;
+const monadRpcTransport = http(getMonadRpcUrl(), {
+  timeout: MONAD_RPC_TIMEOUT_MS,
+});
+
 export const agentPublicClient = createPublicClient({
   chain: monadTestnet,
-  transport: http(process.env.MONAD_RPC_URL),
+  transport: monadRpcTransport,
 });
 
 export function getAgentAccount(): PrivateKeyAccount {
@@ -35,7 +40,7 @@ export function getAgentWalletClient() {
     walletClient = createWalletClient({
       account: getAgentAccount(),
       chain: monadTestnet,
-      transport: http(process.env.MONAD_RPC_URL),
+      transport: monadRpcTransport,
     });
   }
   return walletClient;

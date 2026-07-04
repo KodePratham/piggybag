@@ -31,12 +31,13 @@ export default function MonadBlitzPage() {
             </h1>
 
             <p className="pb-lead">
-              Built something for Monad Blitz? Submit your project and receive 10,000
-              $BLITZ memecoins instantly — no review, no waiting.
+              Built something for Monad Blitz? Submit your project — one per wallet — and
+              receive 10,000 $BLITZ memecoins instantly. The PiggyBag agent will share a
+              compliment on your build.
             </p>
 
             <p className="text-sm text-[#8a8794]">
-              Monad testnet required · 10,000 $BLITZ per project
+              Monad testnet required · One project per wallet · 10,000 $BLITZ per submission
             </p>
 
             <AddBlitzToWallet />
@@ -50,8 +51,8 @@ export default function MonadBlitzPage() {
             <SectionLabel>Submit project</SectionLabel>
             <h2 className="pb-h2">Claim your $BLITZ</h2>
             <p className="pb-body">
-              Connect your wallet, share your GitHub repo and project details. Tokens
-              land in your wallet on submit.
+              Connect your wallet, share your GitHub repo and project details. The agent
+              will compliment your project and tokens land in your wallet on submit.
             </p>
           </div>
 
