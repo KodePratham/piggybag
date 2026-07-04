@@ -1,5 +1,6 @@
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { CreditScore } from "@/components/CreditScore";
+import { FundMe } from "@/components/FundMe";
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
       <div className="mt-10 flex flex-col items-center">
         <ConnectWallet />
         <CreditScore />
+        <FundMe />
       </div>
     </main>
   );
