@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectWallet } from "@/components/ConnectWallet";
+import { Logo } from "@/components/Logo";
 
 const navLinks = [
   { label: "How it works", href: "/#how-it-works" },
@@ -16,9 +17,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-white/90 backdrop-blur-sm">
       <div className="pb-wrap flex h-14 items-center justify-between gap-6">
-        <Link href="/" className="text-[15px] font-semibold tracking-tight text-[var(--foreground)] no-underline">
-          PiggyBag
-        </Link>
+        <Logo size={26} />
 
         <nav className="hidden items-center gap-6 md:flex">
           {navLinks.map((link) => {

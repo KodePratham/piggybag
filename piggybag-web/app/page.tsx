@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ConnectWallet } from "@/components/ConnectWallet";
 import { FundingAgent } from "@/components/FundingAgent";
+import { Logo } from "@/components/Logo";
 
 const stats = [
   { value: "1–5 MON", label: "Per check, on-chain" },
@@ -230,7 +231,7 @@ export default function Home() {
       {/* Footer */}
       <footer>
         <div className="pb-wrap flex flex-col gap-3 py-14 sm:flex-row sm:items-center sm:justify-between">
-          <span className="text-sm font-semibold text-[var(--foreground)]">PiggyBag</span>
+          <Logo linked={false} size={24} />
           <p className="text-sm text-[#8a8794]">
             An AI agent that funds early-stage builders on Monad testnet.
           </p>
