@@ -56,9 +56,19 @@ export function CreditScore() {
             <p className="mt-1 text-sm uppercase tracking-widest">{result.rating}</p>
           </div>
 
+          {result.metadata.historyTruncated && (
+            <p className="max-w-xs text-center text-xs text-black/60">
+              Activity metrics reflect the most recent {result.transactionsScanned} transactions
+              only. Account age uses the wallet&apos;s first transaction.
+            </p>
+          )}
+
           <div className="grid w-full grid-cols-2 gap-x-6 gap-y-3 border border-black/10 p-4 text-left text-xs">
             <Stat label="Transactions scanned" value={String(result.transactionsScanned)} />
-            <Stat label="Account age" value={`${result.breakdown.accountAgeDays} days`} />
+            <Stat
+              label="Days since first transaction"
+              value={`${result.breakdown.accountAgeDays} days`}
+            />
             <Stat label="Unique addresses" value={String(result.breakdown.uniqueCounterparties)} />
             <Stat
               label="Success rate"

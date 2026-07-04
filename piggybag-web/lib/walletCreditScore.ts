@@ -3,7 +3,8 @@ import { monadTestnet } from "viem/chains";
 import { calculateCreditScore } from "@/lib/creditScore";
 import type { CreditScoreResult, ExplorerTransaction } from "@/lib/types/transaction";
 
-const EXPLORER_API = "https://api-testnet.monadscan.com/api";
+const EXPLORER_API = "https://api.etherscan.io/v2/api";
+const CHAIN_ID = "10143"; // Monad testnet
 const MAX_TRANSACTIONS = 500;
 
 const publicClient = createPublicClient({
@@ -17,29 +18,36 @@ type ExplorerResponse = {
   result: ExplorerTransaction[] | string;
 };
 
-async function fetchTransactionsFromExplorer(address: Address): Promise<ExplorerTransaction[]> {
-  const apiKey = process.env.MONADSCAN_API_KEY;
+async function fetchExplorerTxs(
+  address: Address,
+  sort: "asc" | "desc",
+  offset: number,
+  page = 1,
+): Promise<ExplorerTransaction[]> {
+  const apiKey = process.env.ETHERSCAN_API_KEY;
+  if (!apiKey) {
+    throw new Error("Missing ETHERSCAN_API_KEY.");
+  }
+
   const params = new URLSearchParams({
+    chainid: CHAIN_ID,
     module: "account",
     action: "txlist",
     address,
     startblock: "0",
     endblock: "99999999",
-    page: "1",
-    offset: String(MAX_TRANSACTIONS),
-    sort: "asc",
+    page: String(page),
+    offset: String(offset),
+    sort,
+    apikey: apiKey,
   });
-
-  if (apiKey) {
-    params.set("apikey", apiKey);
-  }
 
   const response = await fetch(`${EXPLORER_API}?${params.toString()}`, {
     next: { revalidate: 60 },
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch transaction history from Monadscan.");
+    throw new Error("Failed to fetch transaction history from Etherscan.");
   }
 
   const data = (await response.json()) as ExplorerResponse;
@@ -56,36 +64,35 @@ async function fetchTransactionsFromExplorer(address: Address): Promise<Explorer
   return data.result;
 }
 
-async function fetchOnChainFallback(address: Address): Promise<ExplorerTransaction[]> {
-  const transactionCount = await publicClient.getTransactionCount({ address });
+async function fetchWalletTransactionHistory(address: Address): Promise<{
+  activityTxs: ExplorerTransaction[];
+  firstTxTimestampMs: number | undefined;
+  historyTruncated: boolean;
+}> {
+  const [oldestBatch, recentTxs] = await Promise.all([
+    fetchExplorerTxs(address, "asc", 1),
+    fetchExplorerTxs(address, "desc", MAX_TRANSACTIONS),
+  ]);
 
-  if (transactionCount === 0) {
-    return [];
-  }
+  const firstTxTimestampMs = oldestBatch[0]
+    ? Number(oldestBatch[0].timeStamp) * 1000
+    : undefined;
 
-  const now = Math.floor(Date.now() / 1000);
-
-  return Array.from({ length: Math.min(transactionCount, 20) }, (_, index) => ({
-    hash: `0x${"0".repeat(64)}`,
-    from: address,
-    to: address,
-    value: "0",
-    timeStamp: String(now - (transactionCount - index) * 86400),
-    isError: "0",
-    txreceipt_status: "1",
-  }));
+  return {
+    activityTxs: recentTxs,
+    firstTxTimestampMs,
+    historyTruncated: recentTxs.length === MAX_TRANSACTIONS,
+  };
 }
 
 export async function getWalletCreditScore(address: Address): Promise<CreditScoreResult> {
   const balance = await publicClient.getBalance({ address });
+  const { activityTxs, firstTxTimestampMs, historyTruncated } =
+    await fetchWalletTransactionHistory(address);
 
-  let transactions: ExplorerTransaction[];
-
-  try {
-    transactions = await fetchTransactionsFromExplorer(address);
-  } catch {
-    transactions = await fetchOnChainFallback(address);
-  }
-
-  return calculateCreditScore(address, transactions, balance);
+  return calculateCreditScore(address, activityTxs, balance, {
+    firstTxTimestampMs,
+    dataSource: "explorer",
+    historyTruncated,
+  });
 }

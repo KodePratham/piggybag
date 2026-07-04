@@ -18,9 +18,21 @@ export type CreditScoreBreakdown = {
   balanceMon: number;
 };
 
+export type CreditScoreMetadata = {
+  dataSource: "explorer";
+  historyTruncated: boolean;
+};
+
+export type CreditScoreOptions = {
+  firstTxTimestampMs?: number;
+  dataSource?: CreditScoreMetadata["dataSource"];
+  historyTruncated?: boolean;
+};
+
 export type CreditScoreResult = {
   score: number;
   rating: "Poor" | "Fair" | "Good" | "Very Good" | "Excellent";
   breakdown: CreditScoreBreakdown;
   transactionsScanned: number;
+  metadata: CreditScoreMetadata;
 };

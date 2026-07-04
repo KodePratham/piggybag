@@ -1,4 +1,8 @@
-import type { CreditScoreResult, ExplorerTransaction } from "@/lib/types/transaction";
+import type {
+  CreditScoreOptions,
+  CreditScoreResult,
+  ExplorerTransaction,
+} from "@/lib/types/transaction";
 
 const BASE_SCORE = 300;
 const MAX_SCORE = 850;
@@ -57,10 +61,12 @@ export function calculateCreditScore(
   address: string,
   txs: ExplorerTransaction[],
   balanceWei: bigint,
+  options: CreditScoreOptions = {},
 ): CreditScoreResult {
   const now = Date.now();
   const sorted = [...txs].sort((a, b) => Number(a.timeStamp) - Number(b.timeStamp));
-  const firstTimestamp = sorted[0] ? Number(sorted[0].timeStamp) * 1000 : now;
+  const firstTimestamp =
+    options.firstTxTimestampMs ?? (sorted[0] ? Number(sorted[0].timeStamp) * 1000 : now);
   const lastTimestamp = sorted[sorted.length - 1]
     ? Number(sorted[sorted.length - 1].timeStamp) * 1000
     : now;
@@ -108,5 +114,9 @@ export function calculateCreditScore(
       balanceMon,
     },
     transactionsScanned: txs.length,
+    metadata: {
+      dataSource: options.dataSource ?? "explorer",
+      historyTruncated: options.historyTruncated ?? false,
+    },
   };
 }
