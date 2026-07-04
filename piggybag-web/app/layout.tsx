@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "piggybag",
-  description: "piggybag — connect your wallet on Monad testnet",
+  description: "piggybag — an AI agent that funds early-stage builders on Monad testnet",
 };
 
 export default function RootLayout({
