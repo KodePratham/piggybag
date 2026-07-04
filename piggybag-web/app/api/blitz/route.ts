@@ -6,7 +6,7 @@ import {
   getBlitzProjectForWallet,
 } from "@/lib/blitzProjects";
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 export async function GET(request: NextRequest) {
   const address = request.nextUrl.searchParams.get("address");

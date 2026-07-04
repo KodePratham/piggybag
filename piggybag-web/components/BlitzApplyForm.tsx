@@ -43,7 +43,6 @@ export function BlitzApplyForm() {
 
   useEffect(() => {
     if (!mounted || !isConnected || !address) {
-      setResult(null);
       return;
     }
 
@@ -53,6 +52,7 @@ export function BlitzApplyForm() {
     async function loadExistingProject() {
       setIsCheckingExisting(true);
       setError(null);
+      setResult(null);
 
       const response = await getJson<BlitzResult>(
         `/api/blitz?address=${encodeURIComponent(walletAddress)}`,
@@ -66,6 +66,8 @@ export function BlitzApplyForm() {
         setResult(response.data);
       } else if (response.error !== "No blitz project found for this wallet.") {
         setError(response.error);
+      } else {
+        setResult(null);
       }
 
       setIsCheckingExisting(false);
