@@ -100,13 +100,23 @@ export async function addBlitzToMetaMask(
   }
 
   const params = buildWatchAssetParams(address);
+  const provider = getEthereumProvider();
 
-  if (deps?.switchChain) {
-    try {
-      await deps.switchChain({ chainId: monadTestnet.id });
-    } catch {
-      // User may already be on Monad testnet.
+  // wallet_watchAsset adds the token to the currently selected network, so the
+  // wallet MUST be on Monad testnet first — otherwise the token shows a 0 balance.
+  if (provider) {
+    await ensureMonadTestnet(provider, deps?.switchChain);
+
+    const chainIdHex = (await provider.request({
+      method: "eth_chainId",
+    })) as string;
+    if (Number.parseInt(chainIdHex, 16) !== monadTestnet.id) {
+      throw new Error(
+        "Your wallet is not on Monad Testnet. Switch networks in MetaMask, then add BLITZ again.",
+      );
     }
+  } else if (deps?.switchChain) {
+    await deps.switchChain({ chainId: monadTestnet.id });
   }
 
   if (deps?.watchAssetAsync) {
@@ -116,9 +126,7 @@ export async function addBlitzToMetaMask(
     }
   }
 
-  const provider = getEthereumProvider();
   if (provider) {
-    await ensureMonadTestnet(provider, deps?.switchChain);
     await provider.request({
       method: "wallet_watchAsset",
       params,
