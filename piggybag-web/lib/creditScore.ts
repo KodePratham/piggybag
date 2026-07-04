@@ -7,6 +7,12 @@ import type {
 const BASE_SCORE = 300;
 const MAX_SCORE = 850;
 
+export const FUNDING_MIN_SCORE = 630;
+
+export function isEligibleForFunding(score: number): boolean {
+  return score >= FUNDING_MIN_SCORE;
+}
+
 function getRating(score: number): CreditScoreResult["rating"] {
   if (score >= 780) return "Excellent";
   if (score >= 700) return "Very Good";
