@@ -11,6 +11,13 @@ import { getBlitzTokenAddress } from "@/lib/env";
 const BLITZ_ABI = [
   {
     type: "function",
+    name: "balanceOf",
+    stateMutability: "view",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
     name: "transfer",
     stateMutability: "nonpayable",
     inputs: [
@@ -37,10 +44,24 @@ export async function sendBlitzTokens(
     const account = getAgentAccount();
     const walletClient = getAgentWalletClient();
     const tokenAddress = getBlitzTokenAddress() as Address;
+    const tokenAmount = parseUnits(String(amount), 18);
+    const agentBalance = await agentPublicClient.readContract({
+      abi: BLITZ_ABI,
+      address: tokenAddress,
+      functionName: "balanceOf",
+      args: [account.address],
+    });
+
+    if (agentBalance < tokenAmount) {
+      throw new Error(
+        "Agent wallet does not have enough BLITZ. Deploy the token with AGENT_PRIVATE_KEY or transfer BLITZ to the agent wallet.",
+      );
+    }
+
     const data = encodeFunctionData({
       abi: BLITZ_ABI,
       functionName: "transfer",
-      args: [walletAddress as Address, parseUnits(String(amount), 18)],
+      args: [walletAddress as Address, tokenAmount],
     });
     const request = await walletClient.prepareTransactionRequest({
       account,
@@ -50,20 +71,30 @@ export async function sendBlitzTokens(
     });
     const serializedTransaction = await walletClient.signTransaction(request);
     const expectedTxHash = keccak256(serializedTransaction);
+    let txHash: typeof expectedTxHash;
 
     try {
-      const txHash = await agentPublicClient.sendRawTransaction({
+      txHash = await agentPublicClient.sendRawTransaction({
         serializedTransaction,
       });
-
-      return { txHash, amount };
     } catch (error) {
       if (isRpcTimeoutError(error)) {
-        return { txHash: expectedTxHash, amount };
+        txHash = expectedTxHash;
+      } else {
+        throw error;
       }
-
-      throw error;
     }
+
+    const receipt = await agentPublicClient.waitForTransactionReceipt({
+      hash: txHash,
+      timeout: 90_000,
+    });
+
+    if (receipt.status !== "success") {
+      throw new Error(`BLITZ transfer reverted on-chain. Transaction: ${txHash}`);
+    }
+
+    return { txHash, amount };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     throw new Error(`BLITZ transfer failed: ${message}`);
