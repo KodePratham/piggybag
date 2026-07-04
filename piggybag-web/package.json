@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "bun test",
-    "astryx": "node node_modules/@astryxdesign/cli/bin/astryx.mjs"
+    "astryx": "node node_modules/@astryxdesign/cli/bin/astryx.mjs",
+    "deploy:blitz": "node scripts/deploy-blitz.mjs"
   },
   "dependencies": {
     "@astryxdesign/core": "^0.1.2",
@@ -30,6 +31,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "solc": "^0.8.30",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

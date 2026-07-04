@@ -21,3 +21,11 @@ export function getOpenAIApiKey(): string {
 export function getAgentPrivateKey(): string {
   return getRequiredEnv("AGENT_PRIVATE_KEY");
 }
+
+export function getMonadRpcUrl(): string {
+  return getRequiredEnv("MONAD_RPC_URL");
+}
+
+export function getBlitzTokenAddress(): string {
+  return getRequiredEnv("BLITZ_TOKEN_ADDRESS");
+}

@@ -6,8 +6,7 @@ import { ConnectWallet } from "@/components/ConnectWallet";
 import { Logo } from "@/components/Logo";
 
 const navLinks = [
-  { label: "How it works", href: "/#how-it-works" },
-  { label: "What we fund", href: "/#what-we-fund" },
+  { label: "Monad Blitz", href: "/monad-blitz" },
   { label: "Profile", href: "/profile" },
 ];
 
@@ -16,13 +15,14 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-white/90 backdrop-blur-sm">
-      <div className="pb-wrap flex h-14 items-center justify-between gap-6">
+      <div className="pb-header-wrap flex h-14 items-center justify-between gap-6">
         <Logo size={26} />
 
         <nav className="hidden items-center gap-6 md:flex">
           {navLinks.map((link) => {
             const isActive =
-              link.href === "/profile" && pathname === "/profile";
+              (link.href === "/profile" && pathname === "/profile") ||
+              (link.href === "/monad-blitz" && pathname === "/monad-blitz");
             return (
               <Link
                 key={link.href}
@@ -41,8 +41,12 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-4">
           <Link
-            href="/#apply"
-            className="hidden text-sm font-medium text-[var(--brand)] no-underline hover:underline sm:inline"
+            href="/apply"
+            className={`hidden text-sm font-medium no-underline sm:inline ${
+              pathname === "/apply"
+                ? "text-[var(--brand)] underline"
+                : "text-[var(--brand)] hover:underline"
+            }`}
           >
             Apply
           </Link>

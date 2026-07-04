@@ -33,6 +33,36 @@ export type ApplicationUpdate = {
   updated_at: string;
 };
 
+export type BlitzProjectRow = {
+  id: string;
+  wallet_address: string;
+  github: string;
+  description: string;
+  working_link: string | null;
+  status: string;
+  amount_blitz: number | null;
+  tx_hash: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type BlitzProjectInsert = {
+  wallet_address: string;
+  github: string;
+  description: string;
+  working_link?: string | null;
+  status: string;
+  amount_blitz?: number | null;
+  tx_hash?: string | null;
+};
+
+export type BlitzProjectUpdate = {
+  status: string;
+  amount_blitz?: number | null;
+  tx_hash?: string | null;
+  updated_at: string;
+};
+
 export type UserProfileRow = {
   id: string;
   wallet_address: string;
@@ -135,6 +165,36 @@ export async function updateApplication(id: string, row: ApplicationUpdate): Pro
     }
   } catch (error) {
     throw wrapSupabaseError(error, "updating application");
+  }
+}
+
+export async function insertBlitzProject(row: BlitzProjectInsert): Promise<string> {
+  try {
+    const { data, error } = await getSupabaseAdmin()
+      .from("blitz_projects")
+      .insert(row)
+      .select("id")
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data.id;
+  } catch (error) {
+    throw wrapSupabaseError(error, "creating blitz project");
+  }
+}
+
+export async function updateBlitzProject(id: string, row: BlitzProjectUpdate): Promise<void> {
+  try {
+    const { error } = await getSupabaseAdmin().from("blitz_projects").update(row).eq("id", id);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    throw wrapSupabaseError(error, "updating blitz project");
   }
 }
 
