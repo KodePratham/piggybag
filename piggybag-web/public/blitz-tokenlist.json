@@ -1,0 +1,18 @@
+{
+  "name": "PiggyBag Blitz Token List",
+  "timestamp": "2026-07-04T00:00:00.000Z",
+  "version": { "major": 1, "minor": 0, "patch": 0 },
+  "tags": {},
+  "logoURI": "/blitzcoin.png",
+  "keywords": ["blitz", "monad", "memecoin"],
+  "tokens": [
+    {
+      "chainId": 10143,
+      "address": "0x0000000000000000000000000000000000000000",
+      "name": "Blitz",
+      "symbol": "BLITZ",
+      "decimals": 18,
+      "logoURI": "/blitzcoin.png"
+    }
+  ]
+}
