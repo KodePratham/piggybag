@@ -1,4 +1,4 @@
-![PiggyBag](./PiggyBag.png)
+
 
 # PiggyBag
 
