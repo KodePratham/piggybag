@@ -3,12 +3,14 @@
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
 import { monadTestnet } from "viem/chains";
 import { useState } from "react";
+import { useMounted } from "@/lib/useMounted";
 
 function truncateAddress(address: string) {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
 export function ConnectWallet() {
+  const mounted = useMounted();
   const { address, isConnected } = useAccount();
   const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
@@ -40,6 +42,20 @@ export function ConnectWallet() {
           setError(err.message || "Failed to connect wallet.");
         },
       },
+    );
+  }
+
+  if (!mounted) {
+    return (
+      <div className="flex flex-col items-center gap-3">
+        <button
+          type="button"
+          disabled
+          className="border border-black px-8 py-3 text-sm uppercase tracking-widest transition-colors hover:bg-black hover:text-white disabled:opacity-50"
+        >
+          Connect Wallet
+        </button>
+      </div>
     );
   }
 

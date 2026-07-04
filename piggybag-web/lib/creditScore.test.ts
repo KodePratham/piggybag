@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { calculateCreditScore } from "./creditScore";
+import { calculateCreditScore, FUNDING_MIN_SCORE, isEligibleForFunding } from "./creditScore";
 import type { ExplorerTransaction } from "./types/transaction";
 
 const ADDRESS = "0x1234567890123456789012345678901234567890";
@@ -80,5 +80,19 @@ describe("calculateCreditScore", () => {
     const result = calculateCreditScore(ADDRESS, txs, 0n);
 
     expect(result.breakdown.successRate).toBe(0.5);
+  });
+});
+
+describe("isEligibleForFunding", () => {
+  test("returns true at and above the Good tier threshold", () => {
+    expect(isEligibleForFunding(FUNDING_MIN_SCORE)).toBe(true);
+    expect(isEligibleForFunding(FUNDING_MIN_SCORE + 1)).toBe(true);
+    expect(isEligibleForFunding(850)).toBe(true);
+  });
+
+  test("returns false below the Good tier threshold", () => {
+    expect(isEligibleForFunding(FUNDING_MIN_SCORE - 1)).toBe(false);
+    expect(isEligibleForFunding(580)).toBe(false);
+    expect(isEligibleForFunding(300)).toBe(false);
   });
 });

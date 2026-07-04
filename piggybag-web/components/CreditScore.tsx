@@ -3,14 +3,16 @@
 import { useAccount } from "wagmi";
 import { useState } from "react";
 import type { CreditScoreResult } from "@/lib/types/transaction";
+import { useMounted } from "@/lib/useMounted";
 
 export function CreditScore() {
+  const mounted = useMounted();
   const { address, isConnected } = useAccount();
   const [result, setResult] = useState<CreditScoreResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  if (!isConnected || !address) {
+  if (!mounted || !isConnected || !address) {
     return null;
   }
 
